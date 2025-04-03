@@ -1,4 +1,4 @@
-# Cursor Systems
+# Cursor-10x for Cursor AI
 
 <div align="center">
   <p><em>A portable multi-agent system architecture with memory persistence and inter-agent communication</em></p>
@@ -242,14 +242,9 @@ Each MDC rule file follows this structure:
 
 ```markdown
 ---
-name: "Rule Name"
-description: "Brief description of the rule's purpose"
-version: "1.0.0"
-priority: 123 # Determines loading order
-date: "2025-04-01"
-author: "Author Name"
-category: "agent|system|memory|etc"
-tags: ["tag1", "tag2", "tag3"]
+description: Clear, one-line description of what the rule enforces
+globs: path/to/files/_.ext, other/path/\*\*/_
+alwaysApply: boolean
 ---
 
 # Title of the Rule
@@ -272,7 +267,9 @@ More explanation about using the rule...
 
 ## Dependencies
 
-@file .cursor/path/to/dependency.mdc # Reference to other rule files
+- Use `[filename](mdc:path/to/file)` ([filename](mdc:filename)) to reference files
+- Example: [prisma.mdc](mdc:.cursor/rules/prisma.mdc) for rule references
+- Example: [schema.prisma](mdc:prisma/schema.prisma) for code references
 ```
 
 ### Key Benefits
@@ -407,14 +404,9 @@ There are two ways to create a new agent:
 
 ```markdown
 ---
-name: "Security Specialist Agent"
-description: "Core rules and capabilities for the Security Specialist agent focusing on secure implementation"
-version: "1.0.0"
-priority: 108
-date: "2025-04-01"
-author: "Your Name"
-category: "agent"
-tags: ["security", "penetration-testing", "compliance", "encryption"]
+description: Clear, one-line description of what the rule enforces
+globs: path/to/files/_.ext, other/path/\*\*/_
+alwaysApply: boolean
 ---
 
 # Security Specialist AI Agent
@@ -447,17 +439,17 @@ Maintain expertise in:
 
 // Additional sections with specific capabilities
 
-## Implementation Instructions
+## Supplemental Information
 
-Make sure you always follow the detailed implementation instructions and incorporate all supplemental data provided therein.
+Make sure you always incorporate all supplemental information for your role provided in [instructions.md](mdc:.cursor/agents/security-specialist/instructions.md)
 
-@file .cursor/agents/security-specialist/instructions.md
+## Scratchpad Communication System
 
-## Communication System
+Always use the Agent Shared Scratchpad Communication System [200-scratchpad.mdc](mdc:.cursor/rules/200-scratchpad.mdc)
 
-Always use the Agent Shared Scratchpad Communication System with the following specifications:
+## Coordination Protocol
 
-@file .cursor/rules/200-scratchpad.mdc
+Always coordinate all activities through the Project Executive Architect agent, who serves as the central coordinator for the multi-agent system. Never act independently without the Executive Architect's knowledge and approval.
 ```
 
 2. Create a corresponding agent implementation file in `.cursor/agents/`:
@@ -567,5 +559,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 <div align="center">
-  <p>Built with ❤️ by the Cursor Systems team</p>
+  <p>Built with ❤️ by the Cursor 10x team</p>
 </div>
