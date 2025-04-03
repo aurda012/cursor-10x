@@ -1,0 +1,721 @@
+---
+description: "Implementation of the episodic memory subsystem for conversation history"
+globs: **/*
+alwaysApply: true
+---
+
+# Episodic Memory Subsystem
+
+This module implements the episodic memory subsystem, which stores and manages conversation history.
+
+## Core Functionality
+
+The episodic memory subsystem provides the following key capabilities:
+
+1. **Conversation Storage:** Persistent storage for all conversations between the user and AI assistants.
+2. **Temporal Organization:** Conversations organized by timestamps for chronological retrieval.
+3. **Session Handling:** Grouping of conversations by session for contextual understanding.
+4. **History Retrieval:** Efficient search and retrieval of previous conversations.
+5. **Memory Summarization:** Automatic generation of summaries for conversation sequences.
+
+## Database Schema
+
+The episodic memory uses SQLite to persist conversation data with the following schema:
+
+```sql
+-- Conversation table
+CREATE TABLE IF NOT EXISTS conversations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id TEXT,
+  role TEXT NOT NULL,
+  content TEXT NOT NULL,
+  timestamp INTEGER NOT NULL,
+  metadata TEXT
+);
+
+-- Conversation summary table
+CREATE TABLE IF NOT EXISTS conversation_summaries (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id TEXT,
+  summary TEXT NOT NULL,
+  start_time INTEGER NOT NULL,
+  end_time INTEGER NOT NULL,
+  message_count INTEGER NOT NULL
+);
+
+-- Conversation indices
+CREATE INDEX IF NOT EXISTS idx_conversations_session ON conversations(session_id);
+CREATE INDEX IF NOT EXISTS idx_conversations_timestamp ON conversations(timestamp);
+CREATE INDEX IF NOT EXISTS idx_summaries_session ON conversation_summaries(session_id);
+```
+
+## Standard Operations
+
+The episodic memory subsystem exposes the following operations:
+
+### Store Conversation
+
+Stores a new conversation message in the episodic memory.
+
+```javascript
+function storeConversation({ role, content, session_id = null, timestamp = null, metadata = {} }) {
+  // Store a conversation entry in the database
+  // Returns the ID of the stored conversation
+}
+```
+
+### Retrieve Conversations
+
+Retrieves conversations based on various filters.
+
+```javascript
+function getConversations({ session_id = null, role = null, start_time = null, end_time = null, limit = 50, offset = 0 }) {
+  // Retrieve conversations from the database based on filters
+  // Returns an array of conversation objects
+}
+```
+
+### Get Recent Conversations
+
+Retrieves the most recent conversations.
+
+```javascript
+function getRecentConversations(count = 10, session_id = null) {
+  // Retrieve the most recent conversations
+  // Returns an array of conversation objects
+}
+```
+
+### Summarize Conversations
+
+Generates a summary of a conversation sequence.
+
+```javascript
+function summarizeConversations(conversations) {
+  // Generate a summary of the provided conversations
+  // Returns a string containing the summary
+}
+```
+
+### Store Summary
+
+Stores a generated summary for quick retrieval.
+
+```javascript
+function storeSummary({ session_id, summary, start_time, end_time, message_count }) {
+  // Store a conversation summary in the database
+  // Returns the ID of the stored summary
+}
+```
+
+### Get Session Summary
+
+Retrieves the summary for a specific session.
+
+```javascript
+function getSessionSummary(session_id) {
+  // Retrieve the summary for a specific session
+  // Returns a summary object
+}
+```
+
+## Integration Points
+
+The episodic memory subsystem integrates with other components as follows:
+
+1. **Short-Term Memory:** Receives important context to be persisted from short-term memory.
+2. **Semantic Memory:** Provides conversation data for knowledge extraction to semantic memory.
+3. **Memory Controller:** Exposes methods for the memory controller to store and retrieve conversations.
+
+## Implementation Details
+
+```javascript
+(function() {
+  console.log("🧠 Initializing Episodic Memory Subsystem...");
+  
+  try {
+    // Initialize memory system if it doesn't exist
+    if (!globalThis.MEMORY_SYSTEM) {
+      globalThis.MEMORY_SYSTEM = {};
+      console.log("Created MEMORY_SYSTEM global object");
+    }
+    
+    // Ensure database utilities exist
+    if (!globalThis.MEMORY_SYSTEM.db) {
+      globalThis.MEMORY_SYSTEM.db = {
+        // Simulated in-memory database for demo purposes
+        // In a real implementation, this would use SQLite or another DB
+        conversations: [],
+        summaries: [],
+        
+        // Execute a pseudo-SQL query
+        exec: function(query, params) {
+          console.log(`[DB] Executing query: ${query.substring(0, 50)}...`);
+          return true;
+        },
+        
+        // Get data from the simulated database
+        get: function(query, params) {
+          console.log(`[DB] Get query: ${query.substring(0, 50)}...`);
+          
+          // Simple simulation - not actual SQL parsing
+          if (query.includes("conversations") && query.includes("ORDER BY timestamp DESC LIMIT")) {
+            // Return recent conversations from the in-memory array
+            return this.conversations.slice(0, params?.limit || 10);
+          }
+          
+          if (query.includes("conversation_summaries") && query.includes("session_id")) {
+            // Return session summary
+            return this.summaries.find(s => s.session_id === params.session_id);
+          }
+          
+          return null;
+        },
+        
+        // Get all data matching a query
+        all: function(query, params) {
+          console.log(`[DB] All query: ${query.substring(0, 50)}...`);
+          
+          // Simple simulation
+          if (query.includes("conversations")) {
+            let results = [...this.conversations];
+            
+            // Filter by session_id if provided
+            if (params?.session_id) {
+              results = results.filter(c => c.session_id === params.session_id);
+            }
+            
+            // Filter by role if provided
+            if (params?.role) {
+              results = results.filter(c => c.role === params.role);
+            }
+            
+            // Filter by timestamp if provided
+            if (params?.start_time) {
+              results = results.filter(c => c.timestamp >= params.start_time);
+            }
+            if (params?.end_time) {
+              results = results.filter(c => c.timestamp <= params.end_time);
+            }
+            
+            // Sort by timestamp (descending)
+            results.sort((a, b) => b.timestamp - a.timestamp);
+            
+            // Apply limit and offset
+            if (params?.offset || params?.limit) {
+              const offset = params.offset || 0;
+              const limit = params.limit || 50;
+              results = results.slice(offset, offset + limit);
+            }
+            
+            return results;
+          }
+          
+          return [];
+        },
+        
+        // Insert data into the simulated database
+        run: function(query, params) {
+          console.log(`[DB] Run query: ${query.substring(0, 50)}...`);
+          
+          if (query.includes("INSERT INTO conversations")) {
+            // Generate an ID
+            const id = this.conversations.length + 1;
+            
+            // Create conversation object
+            const conversation = {
+              id: id,
+              session_id: params.session_id || `session_${Date.now()}`,
+              role: params.role,
+              content: params.content,
+              timestamp: params.timestamp || Date.now(),
+              metadata: JSON.stringify(params.metadata || {})
+            };
+            
+            // Add to the in-memory array
+            this.conversations.push(conversation);
+            
+            return { lastID: id };
+          }
+          
+          if (query.includes("INSERT INTO conversation_summaries")) {
+            // Generate an ID
+            const id = this.summaries.length + 1;
+            
+            // Create summary object
+            const summary = {
+              id: id,
+              session_id: params.session_id,
+              summary: params.summary,
+              start_time: params.start_time,
+              end_time: params.end_time,
+              message_count: params.message_count
+            };
+            
+            // Add to the in-memory array
+            this.summaries.push(summary);
+            
+            return { lastID: id };
+          }
+          
+          return { lastID: 0 };
+        }
+      };
+      
+      console.log("Created simulated database for episodic memory");
+    }
+    
+    // Initialize Episodic Memory
+    const EpisodicMemory = {
+      initialized: true,
+      
+      // Set up the database schema
+      initDatabase: function() {
+        console.log("[EPISODIC MEMORY] Initializing database schema...");
+        
+        try {
+          // Create conversations table
+          globalThis.MEMORY_SYSTEM.db.exec(`
+            CREATE TABLE IF NOT EXISTS conversations (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              session_id TEXT,
+              role TEXT NOT NULL,
+              content TEXT NOT NULL,
+              timestamp INTEGER NOT NULL,
+              metadata TEXT
+            )
+          `);
+          
+          // Create conversation summary table
+          globalThis.MEMORY_SYSTEM.db.exec(`
+            CREATE TABLE IF NOT EXISTS conversation_summaries (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              session_id TEXT,
+              summary TEXT NOT NULL,
+              start_time INTEGER NOT NULL,
+              end_time INTEGER NOT NULL,
+              message_count INTEGER NOT NULL
+            )
+          `);
+          
+          // Create indices
+          globalThis.MEMORY_SYSTEM.db.exec(`CREATE INDEX IF NOT EXISTS idx_conversations_session ON conversations(session_id)`);
+          globalThis.MEMORY_SYSTEM.db.exec(`CREATE INDEX IF NOT EXISTS idx_conversations_timestamp ON conversations(timestamp)`);
+          globalThis.MEMORY_SYSTEM.db.exec(`CREATE INDEX IF NOT EXISTS idx_summaries_session ON conversation_summaries(session_id)`);
+          
+          console.log("[EPISODIC MEMORY] Database schema initialized successfully");
+          return true;
+        } catch (error) {
+          console.error("[EPISODIC MEMORY] Error initializing database schema:", error);
+          return false;
+        }
+      },
+      
+      // Store a conversation entry
+      storeConversation: function({ role, content, session_id = null, timestamp = null, metadata = {} }) {
+        console.log(`[EPISODIC MEMORY] Storing conversation: ${role} - ${content.substring(0, 50)}...`);
+        
+        try {
+          // Use current session ID if not provided
+          if (!session_id) {
+            session_id = globalThis.MEMORY_SYSTEM.getContext("session_id") || `session_${Date.now()}`;
+          }
+          
+          // Use current timestamp if not provided
+          if (!timestamp) {
+            timestamp = Date.now();
+          }
+          
+          // JSON stringify metadata if it's an object
+          const metadataStr = typeof metadata === 'object' ? JSON.stringify(metadata) : String(metadata);
+          
+          // Insert into database
+          const result = globalThis.MEMORY_SYSTEM.db.run(
+            `INSERT INTO conversations (session_id, role, content, timestamp, metadata) VALUES (?, ?, ?, ?, ?)`,
+            {
+              session_id: session_id,
+              role: role,
+              content: content,
+              timestamp: timestamp,
+              metadata: metadataStr
+            }
+          );
+          
+          console.log(`[EPISODIC MEMORY] Stored conversation with ID: ${result.lastID}`);
+          return result.lastID;
+        } catch (error) {
+          console.error("[EPISODIC MEMORY] Error storing conversation:", error);
+          return null;
+        }
+      },
+      
+      // Get conversations based on filters
+      getConversations: function({ session_id = null, role = null, start_time = null, end_time = null, limit = 50, offset = 0 }) {
+        console.log(`[EPISODIC MEMORY] Getting conversations with filters: session=${session_id}, role=${role}, limit=${limit}`);
+        
+        try {
+          // Build query parts
+          let whereClause = [];
+          let params = {};
+          
+          if (session_id) {
+            whereClause.push("session_id = :session_id");
+            params.session_id = session_id;
+          }
+          
+          if (role) {
+            whereClause.push("role = :role");
+            params.role = role;
+          }
+          
+          if (start_time) {
+            whereClause.push("timestamp >= :start_time");
+            params.start_time = start_time;
+          }
+          
+          if (end_time) {
+            whereClause.push("timestamp <= :end_time");
+            params.end_time = end_time;
+          }
+          
+          // Construct full query
+          let query = "SELECT * FROM conversations";
+          if (whereClause.length > 0) {
+            query += " WHERE " + whereClause.join(" AND ");
+          }
+          query += " ORDER BY timestamp DESC LIMIT :limit OFFSET :offset";
+          
+          // Add limit and offset to params
+          params.limit = limit;
+          params.offset = offset;
+          
+          // Execute query
+          const conversations = globalThis.MEMORY_SYSTEM.db.all(query, params);
+          
+          // Parse metadata JSON
+          const parsed = conversations.map(conv => {
+            try {
+              conv.metadata = JSON.parse(conv.metadata);
+            } catch (e) {
+              conv.metadata = {};
+            }
+            return conv;
+          });
+          
+          console.log(`[EPISODIC MEMORY] Retrieved ${parsed.length} conversations`);
+          return parsed;
+        } catch (error) {
+          console.error("[EPISODIC MEMORY] Error getting conversations:", error);
+          return [];
+        }
+      },
+      
+      // Get recent conversations
+      getRecentConversations: function(count = 10, session_id = null) {
+        console.log(`[EPISODIC MEMORY] Getting ${count} recent conversations`);
+        
+        try {
+          let query = "SELECT * FROM conversations";
+          let params = { limit: count };
+          
+          if (session_id) {
+            query += " WHERE session_id = :session_id";
+            params.session_id = session_id;
+          }
+          
+          query += " ORDER BY timestamp DESC LIMIT :limit";
+          
+          // Execute query
+          const conversations = globalThis.MEMORY_SYSTEM.db.all(query, params);
+          
+          // Parse metadata JSON
+          const parsed = conversations.map(conv => {
+            try {
+              conv.metadata = JSON.parse(conv.metadata);
+            } catch (e) {
+              conv.metadata = {};
+            }
+            return conv;
+          });
+          
+          console.log(`[EPISODIC MEMORY] Retrieved ${parsed.length} recent conversations`);
+          return parsed;
+        } catch (error) {
+          console.error("[EPISODIC MEMORY] Error getting recent conversations:", error);
+          return [];
+        }
+      },
+      
+      // Generate a summary of conversations
+      summarizeConversations: function(conversations) {
+        console.log(`[EPISODIC MEMORY] Summarizing ${conversations.length} conversations`);
+        
+        try {
+          // Simple summary implementation - would use more sophisticated techniques in practice
+          if (!Array.isArray(conversations) || conversations.length === 0) {
+            return "No conversations to summarize.";
+          }
+          
+          // Count messages by role
+          const roleCounts = {};
+          for (const conv of conversations) {
+            roleCounts[conv.role] = (roleCounts[conv.role] || 0) + 1;
+          }
+          
+          // Get first and last timestamps
+          conversations.sort((a, b) => a.timestamp - b.timestamp);
+          const firstTimestamp = new Date(conversations[0].timestamp).toISOString();
+          const lastTimestamp = new Date(conversations[conversations.length - 1].timestamp).toISOString();
+          
+          // Extract topics (simple keyword extraction)
+          const allText = conversations.map(c => c.content).join(" ");
+          const topics = this.extractTopics(allText);
+          
+          // Create summary
+          const summary = `Conversation with ${conversations.length} messages from ${firstTimestamp} to ${lastTimestamp}. 
+          Message counts by role: ${Object.entries(roleCounts).map(([role, count]) => `${role}: ${count}`).join(", ")}. 
+          Main topics: ${topics.join(", ")}.`;
+          
+          console.log(`[EPISODIC MEMORY] Generated summary: ${summary.substring(0, 100)}...`);
+          return summary;
+        } catch (error) {
+          console.error("[EPISODIC MEMORY] Error summarizing conversations:", error);
+          return "Error generating summary.";
+        }
+      },
+      
+      // Extract topics from text (simplified implementation)
+      extractTopics: function(text) {
+        // This is a very simplified topic extraction
+        // In a real implementation, this would use sophisticated NLP techniques
+        
+        // Convert to lowercase and remove punctuation
+        const cleanText = text.toLowerCase().replace(/[^\w\s]/g, '');
+        
+        // Split into words
+        const words = cleanText.split(/\s+/);
+        
+        // Count word frequency (excluding common words)
+        const commonWords = new Set(["the", "and", "a", "an", "in", "on", "at", "to", "for", "with", "of", "is", "are", "was", "were"]);
+        const wordCounts = {};
+        
+        for (const word of words) {
+          if (word.length > 3 && !commonWords.has(word)) {
+            wordCounts[word] = (wordCounts[word] || 0) + 1;
+          }
+        }
+        
+        // Sort by frequency and take top 5
+        const topics = Object.entries(wordCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([word]) => word);
+        
+        return topics;
+      },
+      
+      // Store a conversation summary
+      storeSummary: function({ session_id, summary, start_time, end_time, message_count }) {
+        console.log(`[EPISODIC MEMORY] Storing summary for session ${session_id}`);
+        
+        try {
+          // Insert into database
+          const result = globalThis.MEMORY_SYSTEM.db.run(
+            `INSERT INTO conversation_summaries (session_id, summary, start_time, end_time, message_count) VALUES (?, ?, ?, ?, ?)`,
+            {
+              session_id: session_id,
+              summary: summary,
+              start_time: start_time,
+              end_time: end_time,
+              message_count: message_count
+            }
+          );
+          
+          console.log(`[EPISODIC MEMORY] Stored summary with ID: ${result.lastID}`);
+          return result.lastID;
+        } catch (error) {
+          console.error("[EPISODIC MEMORY] Error storing summary:", error);
+          return null;
+        }
+      },
+      
+      // Get summary for a session
+      getSessionSummary: function(session_id) {
+        console.log(`[EPISODIC MEMORY] Getting summary for session ${session_id}`);
+        
+        try {
+          // Get from database
+          const summary = globalThis.MEMORY_SYSTEM.db.get(
+            `SELECT * FROM conversation_summaries WHERE session_id = :session_id ORDER BY end_time DESC LIMIT 1`,
+            { session_id: session_id }
+          );
+          
+          if (summary) {
+            console.log(`[EPISODIC MEMORY] Retrieved summary: ${summary.summary.substring(0, 50)}...`);
+          } else {
+            console.log(`[EPISODIC MEMORY] No summary found for session ${session_id}`);
+          }
+          
+          return summary;
+        } catch (error) {
+          console.error("[EPISODIC MEMORY] Error getting session summary:", error);
+          return null;
+        }
+      },
+      
+      // Create a summary for the current session
+      summarizeCurrentSession: function() {
+        console.log("[EPISODIC MEMORY] Summarizing current session");
+        
+        try {
+          // Get current session ID
+          const session_id = globalThis.MEMORY_SYSTEM.getContext("session_id") || `session_${Date.now()}`;
+          
+          // Get conversations for this session
+          const conversations = this.getConversations({ session_id: session_id, limit: 100 });
+          
+          if (conversations.length === 0) {
+            console.log("[EPISODIC MEMORY] No conversations found for current session");
+            return null;
+          }
+          
+          // Generate summary
+          const summary = this.summarizeConversations(conversations);
+          
+          // Get timestamps
+          conversations.sort((a, b) => a.timestamp - b.timestamp);
+          const start_time = conversations[0].timestamp;
+          const end_time = conversations[conversations.length - 1].timestamp;
+          
+          // Store summary
+          this.storeSummary({
+            session_id: session_id,
+            summary: summary,
+            start_time: start_time,
+            end_time: end_time,
+            message_count: conversations.length
+          });
+          
+          // Store in context for easy access
+          globalThis.MEMORY_SYSTEM.storeContext("conversation_summary", summary);
+          
+          console.log("[EPISODIC MEMORY] Current session summarized successfully");
+          return summary;
+        } catch (error) {
+          console.error("[EPISODIC MEMORY] Error summarizing current session:", error);
+          return null;
+        }
+      }
+    };
+    
+    // Initialize database schema
+    EpisodicMemory.initDatabase();
+    
+    // Add methods to MEMORY_SYSTEM
+    globalThis.MEMORY_SYSTEM.storeConversation = EpisodicMemory.storeConversation;
+    globalThis.MEMORY_SYSTEM.getConversations = EpisodicMemory.getConversations;
+    globalThis.MEMORY_SYSTEM.getRecentConversations = EpisodicMemory.getRecentConversations;
+    globalThis.MEMORY_SYSTEM.summarizeConversations = EpisodicMemory.summarizeConversations;
+    globalThis.MEMORY_SYSTEM.storeSummary = EpisodicMemory.storeSummary;
+    globalThis.MEMORY_SYSTEM.getSessionSummary = EpisodicMemory.getSessionSummary;
+    globalThis.MEMORY_SYSTEM.summarizeCurrentSession = EpisodicMemory.summarizeCurrentSession;
+    
+    // Store session ID if not already set
+    if (!globalThis.MEMORY_SYSTEM.getContext || !globalThis.MEMORY_SYSTEM.getContext("session_id")) {
+      const session_id = `session_${Date.now()}`;
+      
+      if (typeof globalThis.MEMORY_SYSTEM.storeContext === 'function') {
+        globalThis.MEMORY_SYSTEM.storeContext("session_id", session_id);
+        console.log(`[EPISODIC MEMORY] Created new session: ${session_id}`);
+      }
+    }
+    
+    // Add system banner if banners exist
+    if (Array.isArray(globalThis.nextResponsePrepend)) {
+      // Check if we already have a memory banner
+      const hasMemoryBanner = globalThis.nextResponsePrepend.some(banner => 
+        banner.includes("MEMORY SYSTEM") || banner.includes("EPISODIC MEMORY")
+      );
+      
+      if (!hasMemoryBanner) {
+        globalThis.nextResponsePrepend.push("📚 [EPISODIC MEMORY: ACTIVE]");
+      }
+    }
+    
+    // Store initialization in episodic memory
+    if (typeof globalThis.MEMORY_SYSTEM.storeConversation === 'function') {
+      globalThis.MEMORY_SYSTEM.storeConversation({
+        role: "system",
+        content: "Episodic memory subsystem initialized.",
+        metadata: { type: "system_event", event: "memory_initialization" }
+      });
+    }
+    
+    console.log("✅ Episodic Memory Subsystem initialized successfully");
+  } catch (error) {
+    console.error("❌ Error initializing episodic memory:", error);
+  }
+})();
+```
+
+## Required Workflow
+
+1. **Session Initialization:** Create a new session at the start of each conversation.
+2. **Message Storage:** Store each message in the episodic memory.
+3. **Summary Generation:** Generate summaries at regular intervals during the conversation.
+4. **Context Retrieval:** Retrieve relevant historical context when necessary.
+5. **Session Synchronization:** Ensure session IDs are consistent across memory subsystems.
+
+## Integration with Short-Term Memory
+
+The episodic memory system integrates with short-term memory as follows:
+
+```javascript
+// Store working context in episodic memory
+function persistWorkingContext() {
+  const workingContext = MEMORY_SYSTEM.getContext("working_context");
+  const sessionId = MEMORY_SYSTEM.getContext("session_id");
+  
+  if (workingContext && sessionId) {
+    MEMORY_SYSTEM.storeConversation({
+      role: "system",
+      content: `Working context: ${JSON.stringify(workingContext)}`,
+      session_id: sessionId,
+      metadata: { type: "working_context" }
+    });
+  }
+}
+```
+
+## Integration with Semantic Memory
+
+The episodic memory system integrates with semantic memory as follows:
+
+```javascript
+// Extract knowledge from conversations
+function extractKnowledgeFromConversations() {
+  const recentConversations = MEMORY_SYSTEM.getRecentConversations(20);
+  
+  for (const conversation of recentConversations) {
+    // Skip system messages
+    if (conversation.role === "system") continue;
+    
+    // Extract entities and relationships
+    const entities = extractEntities(conversation.content);
+    
+    for (const entity of entities) {
+      MEMORY_SYSTEM.storeKnowledge(entity.name, {
+        category: entity.type,
+        content: entity.description,
+        source: `conversation_${conversation.id}`
+      });
+    }
+  }
+  
+  function extractEntities(text) {
+    // Placeholder for entity extraction logic
+    // Would use NLP techniques in a real implementation
+    return [];
+  }
+}
+``` 

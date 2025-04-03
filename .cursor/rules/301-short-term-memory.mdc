@@ -1,0 +1,666 @@
+---
+description: "Implementation of the short-term memory subsystem for current session context"
+globs: **/*
+alwaysApply: true
+---
+
+# Short-Term Memory Subsystem
+
+This module implements the short-term memory subsystem, which manages the current session context and working memory.
+
+## Core Functionality
+
+The short-term memory subsystem provides the following key capabilities:
+
+1. **Context Management:** Store and retrieve contextual information for the current session.
+2. **Working Memory:** Temporary storage for information relevant to the current task.
+3. **Importance Tracking:** Associate importance levels with stored information.
+4. **Context Window Management:** Ensure the most important context is retained within limits.
+5. **State Persistence:** Maintain state across multiple interactions within a session.
+
+## Memory Structure
+
+Short-term memory is organized into the following components:
+
+```
+ShortTermMemory {
+  contexts: {             // Named context containers
+    session_id: string,   // Current session identifier
+    working_context: [],  // Array of context objects for current tasks
+    system_context: {},   // System-level configuration and state
+    user_context: {},     // User preferences and state
+    conversation_context: [], // Recent conversation turns
+    temporary_context: {} // Ephemeral context that expires quickly
+  },
+  metadata: {             // Information about the memory system
+    created_at: timestamp,
+    last_updated: timestamp,
+    context_count: number,
+    memory_limit: number
+  }
+}
+```
+
+## Standard Operations
+
+The short-term memory subsystem exposes the following operations:
+
+### Store Context
+
+Stores a value in a named context container.
+
+```javascript
+function storeContext(contextName, value) {
+  // Store a value in the specified context container
+  // Returns true if successful, false otherwise
+}
+```
+
+### Get Context
+
+Retrieves a value from a named context container.
+
+```javascript
+function getContext(contextName) {
+  // Retrieve a value from the specified context container
+  // Returns the stored value, or null if not found
+}
+```
+
+### Add Working Context
+
+Adds an item to the working context with an importance level.
+
+```javascript
+function addWorkingContext({ topic, details, importance = 3, expires = null }) {
+  // Add an item to the working context
+  // Returns the ID of the added context item
+}
+```
+
+### Get Working Context
+
+Retrieves items from the working context, filtered by criteria.
+
+```javascript
+function getWorkingContext({ topic = null, minImportance = 0, maxItems = 10 }) {
+  // Retrieve items from the working context
+  // Returns an array of context items
+}
+```
+
+### Clear Context
+
+Clears a named context container or specific items.
+
+```javascript
+function clearContext(contextName, itemId = null) {
+  // Clear a context container or a specific item
+  // Returns true if successful, false otherwise
+}
+```
+
+### Prune Memory
+
+Removes less important items to stay within memory limits.
+
+```javascript
+function pruneMemory(targetSize = null) {
+  // Remove less important items to stay within memory limits
+  // Returns the number of items removed
+}
+```
+
+## Integration Points
+
+The short-term memory subsystem integrates with other components as follows:
+
+1. **Episodic Memory:** Important short-term context items are persisted to episodic memory.
+2. **Semantic Memory:** Knowledge extracted from context is stored in semantic memory.
+3. **Memory Controller:** Exposes methods for the memory controller to manage context.
+
+## Implementation Details
+
+```javascript
+(function() {
+  console.log("🧠 Initializing Short-Term Memory Subsystem...");
+  
+  try {
+    // Initialize memory system if it doesn't exist
+    if (!globalThis.MEMORY_SYSTEM) {
+      globalThis.MEMORY_SYSTEM = {};
+      console.log("Created MEMORY_SYSTEM global object");
+    }
+    
+    // Initialize Short-Term Memory
+    const ShortTermMemory = {
+      initialized: true,
+      contexts: {},
+      metadata: {
+        created_at: Date.now(),
+        last_updated: Date.now(),
+        context_count: 0,
+        memory_limit: 1000 // Arbitrary limit for memory items
+      },
+      
+      // Initialize contexts with default values
+      initializeContexts: function() {
+        console.log("[SHORT-TERM MEMORY] Initializing contexts...");
+        
+        try {
+          this.contexts = {
+            session_id: `session_${Date.now()}`,
+            working_context: [],
+            system_context: {},
+            user_context: {},
+            conversation_context: [],
+            temporary_context: {}
+          };
+          
+          this.metadata.context_count = Object.keys(this.contexts).length;
+          console.log("[SHORT-TERM MEMORY] Contexts initialized successfully");
+          return true;
+        } catch (error) {
+          console.error("[SHORT-TERM MEMORY] Error initializing contexts:", error);
+          return false;
+        }
+      },
+      
+      // Store a value in a named context
+      storeContext: function(contextName, value) {
+        console.log(`[SHORT-TERM MEMORY] Storing context: ${contextName}`);
+        
+        try {
+          // Create context container if it doesn't exist
+          if (!(contextName in this.contexts)) {
+            this.contexts[contextName] = null;
+            this.metadata.context_count = Object.keys(this.contexts).length;
+          }
+          
+          // Store the value
+          this.contexts[contextName] = value;
+          this.metadata.last_updated = Date.now();
+          
+          console.log(`[SHORT-TERM MEMORY] Stored context: ${contextName}`);
+          return true;
+        } catch (error) {
+          console.error(`[SHORT-TERM MEMORY] Error storing context ${contextName}:`, error);
+          return false;
+        }
+      },
+      
+      // Get a value from a named context
+      getContext: function(contextName) {
+        console.log(`[SHORT-TERM MEMORY] Getting context: ${contextName}`);
+        
+        try {
+          if (!(contextName in this.contexts)) {
+            console.log(`[SHORT-TERM MEMORY] Context ${contextName} not found`);
+            return null;
+          }
+          
+          return this.contexts[contextName];
+        } catch (error) {
+          console.error(`[SHORT-TERM MEMORY] Error getting context ${contextName}:`, error);
+          return null;
+        }
+      },
+      
+      // Add an item to the working context
+      addWorkingContext: function({ topic, details, importance = 3, expires = null }) {
+        console.log(`[SHORT-TERM MEMORY] Adding working context: ${topic}`);
+        
+        try {
+          // Ensure working context exists
+          if (!Array.isArray(this.contexts.working_context)) {
+            this.contexts.working_context = [];
+          }
+          
+          // Create a unique ID for the context item
+          const id = `ctx_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+          
+          // Create the context item
+          const contextItem = {
+            id: id,
+            topic: topic,
+            details: details,
+            importance: importance,
+            created_at: Date.now(),
+            expires: expires
+          };
+          
+          // Add to working context
+          this.contexts.working_context.push(contextItem);
+          this.metadata.last_updated = Date.now();
+          
+          // Prune memory if we're over the limit
+          if (this.contexts.working_context.length > this.metadata.memory_limit) {
+            this.pruneMemory();
+          }
+          
+          console.log(`[SHORT-TERM MEMORY] Added working context with ID: ${id}`);
+          return id;
+        } catch (error) {
+          console.error("[SHORT-TERM MEMORY] Error adding working context:", error);
+          return null;
+        }
+      },
+      
+      // Get items from the working context
+      getWorkingContext: function({ topic = null, minImportance = 0, maxItems = 10 }) {
+        console.log(`[SHORT-TERM MEMORY] Getting working context: topic=${topic}, minImportance=${minImportance}`);
+        
+        try {
+          // Ensure working context exists
+          if (!Array.isArray(this.contexts.working_context)) {
+            return [];
+          }
+          
+          // Filter by criteria
+          let result = this.contexts.working_context;
+          
+          // Filter by topic if provided
+          if (topic) {
+            result = result.filter(item => item.topic === topic);
+          }
+          
+          // Filter by minimum importance
+          result = result.filter(item => item.importance >= minImportance);
+          
+          // Filter out expired items
+          const now = Date.now();
+          result = result.filter(item => !item.expires || item.expires > now);
+          
+          // Sort by importance (descending)
+          result.sort((a, b) => b.importance - a.importance);
+          
+          // Apply max items limit
+          if (maxItems && result.length > maxItems) {
+            result = result.slice(0, maxItems);
+          }
+          
+          console.log(`[SHORT-TERM MEMORY] Retrieved ${result.length} working context items`);
+          return result;
+        } catch (error) {
+          console.error("[SHORT-TERM MEMORY] Error getting working context:", error);
+          return [];
+        }
+      },
+      
+      // Clear a context or specific item
+      clearContext: function(contextName, itemId = null) {
+        console.log(`[SHORT-TERM MEMORY] Clearing context: ${contextName}, itemId=${itemId}`);
+        
+        try {
+          if (!(contextName in this.contexts)) {
+            console.log(`[SHORT-TERM MEMORY] Context ${contextName} not found`);
+            return false;
+          }
+          
+          // If itemId is provided and the context is an array, remove just that item
+          if (itemId && Array.isArray(this.contexts[contextName])) {
+            const initialLength = this.contexts[contextName].length;
+            this.contexts[contextName] = this.contexts[contextName].filter(item => item.id !== itemId);
+            
+            const removed = initialLength - this.contexts[contextName].length;
+            console.log(`[SHORT-TERM MEMORY] Removed ${removed} items from ${contextName}`);
+            
+            this.metadata.last_updated = Date.now();
+            return removed > 0;
+          }
+          
+          // Otherwise, clear the entire context
+          if (Array.isArray(this.contexts[contextName])) {
+            this.contexts[contextName] = [];
+          } else if (typeof this.contexts[contextName] === 'object') {
+            this.contexts[contextName] = {};
+          } else {
+            this.contexts[contextName] = null;
+          }
+          
+          this.metadata.last_updated = Date.now();
+          console.log(`[SHORT-TERM MEMORY] Cleared context: ${contextName}`);
+          return true;
+        } catch (error) {
+          console.error(`[SHORT-TERM MEMORY] Error clearing context ${contextName}:`, error);
+          return false;
+        }
+      },
+      
+      // Prune memory to stay within limits
+      pruneMemory: function(targetSize = null) {
+        console.log(`[SHORT-TERM MEMORY] Pruning memory to target size: ${targetSize || this.metadata.memory_limit}`);
+        
+        try {
+          // Set target size to memory limit if not provided
+          if (!targetSize) {
+            targetSize = this.metadata.memory_limit;
+          }
+          
+          // Only prune working context for now
+          if (!Array.isArray(this.contexts.working_context)) {
+            return 0;
+          }
+          
+          // If we're under the target size, no need to prune
+          if (this.contexts.working_context.length <= targetSize) {
+            return 0;
+          }
+          
+          // Remove expired items first
+          const now = Date.now();
+          const initialLength = this.contexts.working_context.length;
+          this.contexts.working_context = this.contexts.working_context.filter(item => !item.expires || item.expires > now);
+          
+          let removed = initialLength - this.contexts.working_context.length;
+          
+          // If we're still over the target size, remove low importance items
+          if (this.contexts.working_context.length > targetSize) {
+            // Sort by importance (ascending) to remove least important first
+            this.contexts.working_context.sort((a, b) => a.importance - b.importance);
+            
+            // Keep only the most important items
+            const excessItems = this.contexts.working_context.length - targetSize;
+            this.contexts.working_context = this.contexts.working_context.slice(excessItems);
+            
+            // Resort by importance (descending) for normal use
+            this.contexts.working_context.sort((a, b) => b.importance - a.importance);
+            
+            removed += excessItems;
+          }
+          
+          this.metadata.last_updated = Date.now();
+          console.log(`[SHORT-TERM MEMORY] Pruned ${removed} items from memory`);
+          return removed;
+        } catch (error) {
+          console.error("[SHORT-TERM MEMORY] Error pruning memory:", error);
+          return 0;
+        }
+      },
+      
+      // Add recent conversation turn
+      addConversationTurn: function({ role, content, timestamp = null }) {
+        console.log(`[SHORT-TERM MEMORY] Adding conversation turn: ${role}`);
+        
+        try {
+          // Ensure conversation context exists
+          if (!Array.isArray(this.contexts.conversation_context)) {
+            this.contexts.conversation_context = [];
+          }
+          
+          // Create the conversation turn
+          const turn = {
+            role: role,
+            content: content,
+            timestamp: timestamp || Date.now()
+          };
+          
+          // Add to conversation context
+          this.contexts.conversation_context.push(turn);
+          this.metadata.last_updated = Date.now();
+          
+          // Keep only the most recent turns (e.g., 10)
+          const maxTurns = 10;
+          if (this.contexts.conversation_context.length > maxTurns) {
+            this.contexts.conversation_context = this.contexts.conversation_context.slice(-maxTurns);
+          }
+          
+          console.log(`[SHORT-TERM MEMORY] Added conversation turn for ${role}`);
+          return true;
+        } catch (error) {
+          console.error("[SHORT-TERM MEMORY] Error adding conversation turn:", error);
+          return false;
+        }
+      },
+      
+      // Get recent conversation turns
+      getConversationContext: function(maxTurns = 5) {
+        console.log(`[SHORT-TERM MEMORY] Getting conversation context, max turns: ${maxTurns}`);
+        
+        try {
+          // Ensure conversation context exists
+          if (!Array.isArray(this.contexts.conversation_context)) {
+            return [];
+          }
+          
+          // Get the most recent turns
+          const turns = this.contexts.conversation_context.slice(-maxTurns);
+          
+          console.log(`[SHORT-TERM MEMORY] Retrieved ${turns.length} conversation turns`);
+          return turns;
+        } catch (error) {
+          console.error("[SHORT-TERM MEMORY] Error getting conversation context:", error);
+          return [];
+        }
+      },
+      
+      // Set user preferences
+      setUserPreference: function(key, value) {
+        console.log(`[SHORT-TERM MEMORY] Setting user preference: ${key}`);
+        
+        try {
+          // Ensure user context exists
+          if (!this.contexts.user_context || typeof this.contexts.user_context !== 'object') {
+            this.contexts.user_context = {};
+          }
+          
+          // Set the preference
+          this.contexts.user_context[key] = value;
+          this.metadata.last_updated = Date.now();
+          
+          console.log(`[SHORT-TERM MEMORY] Set user preference: ${key}`);
+          return true;
+        } catch (error) {
+          console.error(`[SHORT-TERM MEMORY] Error setting user preference ${key}:`, error);
+          return false;
+        }
+      },
+      
+      // Get user preferences
+      getUserPreference: function(key) {
+        console.log(`[SHORT-TERM MEMORY] Getting user preference: ${key}`);
+        
+        try {
+          // Ensure user context exists
+          if (!this.contexts.user_context || typeof this.contexts.user_context !== 'object') {
+            return null;
+          }
+          
+          // Get the preference
+          return this.contexts.user_context[key];
+        } catch (error) {
+          console.error(`[SHORT-TERM MEMORY] Error getting user preference ${key}:`, error);
+          return null;
+        }
+      },
+      
+      // Merge context data
+      mergeContext: function(contextName, data) {
+        console.log(`[SHORT-TERM MEMORY] Merging context data for: ${contextName}`);
+        
+        try {
+          // Ensure context exists
+          if (!(contextName in this.contexts)) {
+            this.contexts[contextName] = {};
+          }
+          
+          // If context is not an object, we can't merge
+          if (typeof this.contexts[contextName] !== 'object' || this.contexts[contextName] === null) {
+            console.error(`[SHORT-TERM MEMORY] Cannot merge with non-object context: ${contextName}`);
+            return false;
+          }
+          
+          // If data is not an object, we can't merge
+          if (typeof data !== 'object' || data === null) {
+            console.error(`[SHORT-TERM MEMORY] Cannot merge non-object data into context: ${contextName}`);
+            return false;
+          }
+          
+          // Merge the data
+          this.contexts[contextName] = {
+            ...this.contexts[contextName],
+            ...data
+          };
+          
+          this.metadata.last_updated = Date.now();
+          console.log(`[SHORT-TERM MEMORY] Merged context data for: ${contextName}`);
+          return true;
+        } catch (error) {
+          console.error(`[SHORT-TERM MEMORY] Error merging context data for ${contextName}:`, error);
+          return false;
+        }
+      },
+      
+      // Dump memory state for debugging
+      dumpMemoryState: function() {
+        console.log("[SHORT-TERM MEMORY] Dumping memory state");
+        
+        try {
+          // Create a simplified state object
+          const state = {
+            metadata: { ...this.metadata },
+            contextKeys: Object.keys(this.contexts),
+            workingContextCount: Array.isArray(this.contexts.working_context) ? this.contexts.working_context.length : 0,
+            conversationTurns: Array.isArray(this.contexts.conversation_context) ? this.contexts.conversation_context.length : 0,
+            sessionId: this.contexts.session_id
+          };
+          
+          console.log(`[SHORT-TERM MEMORY] Memory state: ${JSON.stringify(state)}`);
+          return state;
+        } catch (error) {
+          console.error("[SHORT-TERM MEMORY] Error dumping memory state:", error);
+          return null;
+        }
+      }
+    };
+    
+    // Initialize contexts
+    ShortTermMemory.initializeContexts();
+    
+    // Add methods to MEMORY_SYSTEM
+    globalThis.MEMORY_SYSTEM.storeContext = ShortTermMemory.storeContext.bind(ShortTermMemory);
+    globalThis.MEMORY_SYSTEM.getContext = ShortTermMemory.getContext.bind(ShortTermMemory);
+    globalThis.MEMORY_SYSTEM.addWorkingContext = ShortTermMemory.addWorkingContext.bind(ShortTermMemory);
+    globalThis.MEMORY_SYSTEM.getWorkingContext = ShortTermMemory.getWorkingContext.bind(ShortTermMemory);
+    globalThis.MEMORY_SYSTEM.clearContext = ShortTermMemory.clearContext.bind(ShortTermMemory);
+    globalThis.MEMORY_SYSTEM.pruneMemory = ShortTermMemory.pruneMemory.bind(ShortTermMemory);
+    globalThis.MEMORY_SYSTEM.addConversationTurn = ShortTermMemory.addConversationTurn.bind(ShortTermMemory);
+    globalThis.MEMORY_SYSTEM.getConversationContext = ShortTermMemory.getConversationContext.bind(ShortTermMemory);
+    globalThis.MEMORY_SYSTEM.setUserPreference = ShortTermMemory.setUserPreference.bind(ShortTermMemory);
+    globalThis.MEMORY_SYSTEM.getUserPreference = ShortTermMemory.getUserPreference.bind(ShortTermMemory);
+    globalThis.MEMORY_SYSTEM.mergeContext = ShortTermMemory.mergeContext.bind(ShortTermMemory);
+    globalThis.MEMORY_SYSTEM.dumpMemoryState = ShortTermMemory.dumpMemoryState.bind(ShortTermMemory);
+    
+    // Add system banner if banners exist
+    if (Array.isArray(globalThis.nextResponsePrepend)) {
+      // Check if we already have a memory banner
+      const hasMemoryBanner = globalThis.nextResponsePrepend.some(banner => 
+        banner.includes("MEMORY SYSTEM") || banner.includes("SHORT-TERM MEMORY")
+      );
+      
+      if (!hasMemoryBanner) {
+        globalThis.nextResponsePrepend.push("🧠 [SHORT-TERM MEMORY: ACTIVE]");
+      }
+    }
+    
+    console.log("✅ Short-Term Memory Subsystem initialized successfully");
+  } catch (error) {
+    console.error("❌ Error initializing short-term memory:", error);
+  }
+})();
+```
+
+## Required Workflow
+
+1. **Session Initialization:** Initialize a new session ID at the start of each conversation.
+2. **Context Storage:** Store important information in the appropriate context containers.
+3. **Working Memory Management:** Add and retrieve context items with proper importance levels.
+4. **Conversation Tracking:** Track recent conversation turns for immediate context.
+5. **Memory Pruning:** Regularly prune less important items to maintain memory limits.
+
+## Integration with Episodic Memory
+
+The short-term memory system integrates with episodic memory as follows:
+
+```javascript
+// Persist important working context to episodic memory
+function persistImportantContext() {
+  // Get important working context items
+  const importantItems = MEMORY_SYSTEM.getWorkingContext({ minImportance: 4 });
+  
+  if (importantItems.length === 0) {
+    return;
+  }
+  
+  // Get current session ID
+  const sessionId = MEMORY_SYSTEM.getContext("session_id");
+  
+  // Store in episodic memory
+  MEMORY_SYSTEM.storeConversation({
+    role: "system",
+    content: `Important context: ${JSON.stringify(importantItems)}`,
+    session_id: sessionId,
+    metadata: { type: "important_context" }
+  });
+}
+```
+
+## Integration with Semantic Memory
+
+The short-term memory system integrates with semantic memory as follows:
+
+```javascript
+// Extract knowledge from working context
+function extractKnowledgeFromContext() {
+  // Get all working context items
+  const contextItems = MEMORY_SYSTEM.getWorkingContext({ maxItems: 50 });
+  
+  for (const item of contextItems) {
+    // Skip low importance items
+    if (item.importance < 3) continue;
+    
+    // Store in semantic memory
+    MEMORY_SYSTEM.storeKnowledge(item.topic, {
+      category: "working_context",
+      content: item.details,
+      importance: mapImportance(item.importance),
+      source: "short_term_memory"
+    });
+  }
+  
+  function mapImportance(numericImportance) {
+    if (numericImportance >= 5) return "high";
+    if (numericImportance >= 3) return "medium";
+    return "low";
+  }
+}
+```
+
+## Example Usage
+
+```javascript
+// Store a session ID
+MEMORY_SYSTEM.storeContext("session_id", "session_1234567890");
+
+// Add working context
+MEMORY_SYSTEM.addWorkingContext({
+  topic: "project_goal",
+  details: "Build a multi-agent memory system",
+  importance: 5
+});
+
+// Add a conversation turn
+MEMORY_SYSTEM.addConversationTurn({
+  role: "user",
+  content: "How does the memory system work?"
+});
+
+// Get working context by topic
+const projectGoal = MEMORY_SYSTEM.getWorkingContext({ topic: "project_goal" });
+
+// Get recent conversation turns
+const recentConversation = MEMORY_SYSTEM.getConversationContext(3);
+
+// Store user preferences
+MEMORY_SYSTEM.setUserPreference("theme", "dark");
+``` 

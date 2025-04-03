@@ -1,0 +1,978 @@
+---
+description: "Implementation of the shared scratchpad communication system for agent coordination"
+globs: **/*
+alwaysApply: true
+---
+
+# Scratchpad Communication System
+
+This module implements the shared scratchpad system, enabling communication and coordination between multiple agents.
+
+## Version and Compatibility
+
+The Scratchpad Communication System is version 1.2.0 and fully integrates with the System Compatibility Layer to ensure consistent naming conventions across the codebase:
+
+- **Primary Scratchpad Object**: `globalThis.SCRATCHPAD_SYSTEM`
+- **Compatibility Alias**: `globalThis.SCRATCHPAD`
+
+Both objects refer to the same instance, ensuring consistent access regardless of which naming convention is used in different parts of the codebase. The compatibility layer [system-compatibility.js](mdc:.cursor/system-compatibility.js) enforces these conventions.
+
+## System Verification
+
+Verify the scratchpad system is properly initialized and using standardized naming conventions:
+
+```javascript
+// Verify system initialization using compatibility validation
+if (globalThis.SCRATCHPAD_SYSTEM || globalThis.SCRATCHPAD) {
+  // Use the standardized validation function from compatibility layer if available
+  if (typeof globalThis.validateSystemConsistency === 'function') {
+    const result = globalThis.validateSystemConsistency("scratchpad");
+    
+    if (!result) {
+      console.error("Compatibility error: SCRATCHPAD_SYSTEM and SCRATCHPAD are not properly synchronized");
+      
+      // Attempt to fix using compatibility layer
+      if (typeof globalThis.enhanceCompatibilityLayer === 'function') {
+        console.log("Attempting to enhance compatibility layer...");
+        globalThis.enhanceCompatibilityLayer();
+      }
+    }
+  } else {
+    // Manual compatibility check if validation function is not available
+    if (globalThis.SCRATCHPAD_SYSTEM !== globalThis.SCRATCHPAD) {
+      console.error("Manual check failed: SCRATCHPAD_SYSTEM and SCRATCHPAD references differ");
+      
+      // Apply simple fix if possible
+      if (globalThis.SCRATCHPAD_SYSTEM && !globalThis.SCRATCHPAD) {
+        globalThis.SCRATCHPAD = globalThis.SCRATCHPAD_SYSTEM;
+        console.log("Applied fix: SCRATCHPAD now references SCRATCHPAD_SYSTEM");
+      } else if (!globalThis.SCRATCHPAD_SYSTEM && globalThis.SCRATCHPAD) {
+        globalThis.SCRATCHPAD_SYSTEM = globalThis.SCRATCHPAD;
+        console.log("Applied fix: SCRATCHPAD_SYSTEM now references SCRATCHPAD");
+      }
+    }
+  }
+  
+  // Verify core functionality through standard interface
+  try {
+    const createMessageFn = 
+      (globalThis.SCRATCHPAD_SYSTEM && globalThis.SCRATCHPAD_SYSTEM.createMessage) ||
+      (globalThis.SCRATCHPAD && globalThis.SCRATCHPAD.createMessage);
+      
+    if (typeof createMessageFn === 'function') {
+      console.log("✅ Scratchpad system createMessage method is available");
+    } else {
+      console.warn("⚠️ createMessage method not available on scratchpad system");
+    }
+  } catch (error) {
+    console.error(`❌ Error accessing scratchpad methods: ${error.message}`);
+  }
+} else {
+  console.error("❌ Scratchpad system is not initialized");
+}
+```
+
+## Core Functionality
+
+The scratchpad communication system provides the following key capabilities:
+
+1. **Shared Workspace:** A persistent area where agents can read and write information.
+2. **Message Passing:** Structured communication between agents.
+3. **Task Coordination:** Delegation and tracking of tasks across agents.
+4. **State Persistence:** Maintaining state across agent interactions.
+5. **Global Variables:** Sharing variables between agents and components.
+
+## Scratchpad Structure
+
+The scratchpad is organized into the following components:
+
+```
+Scratchpad {
+  messages: [              // Agent messages
+    {
+      id: string,
+      from: string,
+      to: string,
+      content: string,
+      timestamp: number,
+      read: boolean
+    }
+  ],
+  tasks: [                 // Tasks for agents to execute
+    {
+      id: string,
+      description: string,
+      assignedTo: string,
+      status: "pending" | "in_progress" | "completed" | "failed",
+      priority: number,
+      created: number,
+      updated: number,
+      result: any
+    }
+  ],
+  workspace: {             // Shared workspace data
+    variables: { },        // Shared variables
+    notes: { },            // Agent notes
+    code_snippets: { },    // Reusable code pieces
+    insights: [ ]          // Discovered insights
+  },
+  agents: {                // Agent registry
+    [name]: {
+      status: "active" | "inactive" | "busy",
+      capabilities: [ ],
+      last_active: number
+    }
+  }
+}
+```
+
+## Standard Operations
+
+The scratchpad system exposes the following operations:
+
+### Send Message
+
+Sends a message from one agent to another.
+
+```javascript
+function sendMessage(from, to, content) {
+  // Send a message from one agent to another
+  // Returns the ID of the sent message
+}
+```
+
+### Read Messages
+
+Reads messages sent to an agent.
+
+```javascript
+function readMessages(agent, options = {}) {
+  // Read messages sent to an agent
+  // Returns an array of messages
+}
+```
+
+### Create Task
+
+Creates a new task and assigns it to an agent.
+
+```javascript
+function createTask(description, assignedTo, options = {}) {
+  // Create a new task and assign it to an agent
+  // Returns the ID of the created task
+}
+```
+
+### Update Task
+
+Updates the status of a task.
+
+```javascript
+function updateTask(taskId, status, result = null) {
+  // Update the status of a task
+  // Returns true if successful, false otherwise
+}
+```
+
+### Get Tasks
+
+Gets tasks assigned to an agent or all tasks.
+
+```javascript
+function getTasks(options = {}) {
+  // Get tasks assigned to an agent or all tasks
+  // Returns an array of tasks
+}
+```
+
+### Set Variable
+
+Sets a shared variable in the workspace.
+
+```javascript
+function setVariable(key, value, scope = "global") {
+  // Set a shared variable in the workspace
+  // Returns true if successful, false otherwise
+}
+```
+
+### Get Variable
+
+Gets a shared variable from the workspace.
+
+```javascript
+function getVariable(key, scope = "global") {
+  // Get a shared variable from the workspace
+  // Returns the value of the variable, or null if not found
+}
+```
+
+### Add Note
+
+Adds a note to the workspace.
+
+```javascript
+function addNote(category, title, content) {
+  // Add a note to the workspace
+  // Returns the ID of the created note
+}
+```
+
+### Register Agent
+
+Registers an agent with the scratchpad.
+
+```javascript
+function registerAgent(name, capabilities = []) {
+  // Register an agent with the scratchpad
+  // Returns true if successful, false otherwise
+}
+```
+
+## Implementation Details
+
+<script>
+(function() {
+  console.log("🗒️ Initializing Scratchpad Communication System...");
+  
+  try {
+    // Load compatibility layer if not already loaded
+    if (typeof globalThis.validateSystemConsistency === 'function') {
+      // Check if scratchpad system is already properly initialized
+      const isConsistent = globalThis.validateSystemConsistency("scratchpad");
+      if (!isConsistent) {
+        console.log("Enhancing compatibility layer for Scratchpad System");
+        if (typeof globalThis.enhanceCompatibilityLayer === 'function') {
+          globalThis.enhanceCompatibilityLayer();
+        }
+      }
+    } else if (typeof globalThis.initializeCompatibilityLayer === 'function' && 
+        (!globalThis.SCRATCHPAD_SYSTEM && !globalThis.SCRATCHPAD)) {
+      console.log("Loading compatibility layer for Scratchpad System");
+      globalThis.initializeCompatibilityLayer();
+    }
+    
+    // Create global scratchpad if it doesn't exist
+    if (!globalThis.SCRATCHPAD_SYSTEM && !globalThis.SCRATCHPAD) {
+      const scratchpadSystem = {
+        version: "1.1.0",
+        messages: [],
+        tasks: [],
+        workspace: {
+          variables: {},
+          notes: {},
+          code_snippets: {},
+          insights: []
+        },
+        agents: {}
+      };
+      
+      // Apply naming conventions through global objects
+      globalThis.SCRATCHPAD_SYSTEM = scratchpadSystem;
+      globalThis.SCRATCHPAD = scratchpadSystem;
+      
+      console.log("Created scratchpad system with standardized naming conventions");
+    } else if (globalThis.SCRATCHPAD && !globalThis.SCRATCHPAD_SYSTEM) {
+      // Ensure compatibility if only the legacy name exists
+      globalThis.SCRATCHPAD_SYSTEM = globalThis.SCRATCHPAD;
+      console.log("Applied compatibility layer to existing SCRATCHPAD object");
+    } else if (globalThis.SCRATCHPAD_SYSTEM && !globalThis.SCRATCHPAD) {
+      // Ensure compatibility if only the new name exists
+      globalThis.SCRATCHPAD = globalThis.SCRATCHPAD_SYSTEM;
+      console.log("Applied compatibility layer to existing SCRATCHPAD_SYSTEM object");
+    }
+    
+    // Verify naming conventions
+    if (globalThis.SCRATCHPAD !== globalThis.SCRATCHPAD_SYSTEM) {
+      console.error("ERROR: SCRATCHPAD and SCRATCHPAD_SYSTEM must reference the same object");
+      // Force alignment
+      globalThis.SCRATCHPAD = globalThis.SCRATCHPAD_SYSTEM;
+    }
+    
+    // Initialize scratchpad system
+    const ScratchpadSystem = {
+      initialized: true,
+      
+      // Send a message from one agent to another
+      sendMessage: function(from, to, content) {
+        console.log(`[SCRATCHPAD] Sending message from ${from} to ${to}`);
+        
+        try {
+          // Create message ID
+          const id = `msg_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+          
+          // Create message object
+          const message = {
+            id: id,
+            from: from,
+            to: to,
+            content: content,
+            timestamp: Date.now(),
+            read: false
+          };
+          
+          // Add message to scratchpad
+          globalThis.SCRATCHPAD.messages.push(message);
+          
+          console.log(`[SCRATCHPAD] Message sent, ID: ${id}`);
+          return id;
+        } catch (error) {
+          console.error("[SCRATCHPAD] Error sending message:", error);
+          return null;
+        }
+      },
+      
+      // Read messages sent to an agent
+      readMessages: function(agent, options = {}) {
+        console.log(`[SCRATCHPAD] Reading messages for agent: ${agent}`);
+        
+        try {
+          const defaultOptions = {
+            markAsRead: true,
+            onlyUnread: false,
+            limit: 10,
+            from: null
+          };
+          
+          // Merge options with defaults
+          const mergedOptions = { ...defaultOptions, ...options };
+          
+          // Filter messages by recipient
+          let messages = globalThis.SCRATCHPAD.messages.filter(msg => msg.to === agent);
+          
+          // Filter by sender if specified
+          if (mergedOptions.from) {
+            messages = messages.filter(msg => msg.from === mergedOptions.from);
+          }
+          
+          // Filter by read status if requested
+          if (mergedOptions.onlyUnread) {
+            messages = messages.filter(msg => !msg.read);
+          }
+          
+          // Sort by timestamp (newest first)
+          messages.sort((a, b) => b.timestamp - a.timestamp);
+          
+          // Apply limit
+          if (mergedOptions.limit > 0) {
+            messages = messages.slice(0, mergedOptions.limit);
+          }
+          
+          // Mark as read if requested
+          if (mergedOptions.markAsRead) {
+            messages.forEach(msg => {
+              const original = globalThis.SCRATCHPAD.messages.find(m => m.id === msg.id);
+              if (original) {
+                original.read = true;
+              }
+            });
+          }
+          
+          console.log(`[SCRATCHPAD] Retrieved ${messages.length} messages for ${agent}`);
+          return messages;
+        } catch (error) {
+          console.error("[SCRATCHPAD] Error reading messages:", error);
+          return [];
+        }
+      },
+      
+      // Create a new task and assign it to an agent
+      createTask: function(description, assignedTo, options = {}) {
+        console.log(`[SCRATCHPAD] Creating task for agent: ${assignedTo}`);
+        
+        try {
+          const defaultOptions = {
+            priority: 5,
+            details: null,
+            due: null
+          };
+          
+          // Merge options with defaults
+          const mergedOptions = { ...defaultOptions, ...options };
+          
+          // Create task ID
+          const id = `task_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+          
+          // Create task object
+          const task = {
+            id: id,
+            description: description,
+            assignedTo: assignedTo,
+            status: "pending",
+            priority: mergedOptions.priority,
+            details: mergedOptions.details,
+            due: mergedOptions.due,
+            created: Date.now(),
+            updated: Date.now(),
+            result: null
+          };
+          
+          // Add task to scratchpad
+          globalThis.SCRATCHPAD.tasks.push(task);
+          
+          // Notify the agent about the new task
+          this.sendMessage("system", assignedTo, `New task assigned: ${description}`);
+          
+          console.log(`[SCRATCHPAD] Task created, ID: ${id}`);
+          return id;
+        } catch (error) {
+          console.error("[SCRATCHPAD] Error creating task:", error);
+          return null;
+        }
+      },
+      
+      // Update the status of a task
+      updateTask: function(taskId, status, result = null) {
+        console.log(`[SCRATCHPAD] Updating task ${taskId} to ${status}`);
+        
+        try {
+          // Find the task
+          const task = globalThis.SCRATCHPAD.tasks.find(t => t.id === taskId);
+          
+          if (!task) {
+            console.error(`[SCRATCHPAD] Task ${taskId} not found`);
+            return false;
+          }
+          
+          // Validate status
+          const validStatuses = ["pending", "in_progress", "completed", "failed"];
+          if (!validStatuses.includes(status)) {
+            console.error(`[SCRATCHPAD] Invalid status: ${status}`);
+            return false;
+          }
+          
+          // Update the task
+          task.status = status;
+          task.updated = Date.now();
+          
+          if (result !== null) {
+            task.result = result;
+          }
+          
+          // Notify the creator about the task update
+          this.sendMessage("system", task.assignedTo, `Task updated: ${task.description} - ${status}`);
+          
+          console.log(`[SCRATCHPAD] Task ${taskId} updated to ${status}`);
+          return true;
+        } catch (error) {
+          console.error("[SCRATCHPAD] Error updating task:", error);
+          return false;
+        }
+      },
+      
+      // Get tasks assigned to an agent or all tasks
+      getTasks: function(options = {}) {
+        console.log(`[SCRATCHPAD] Getting tasks with options: ${JSON.stringify(options)}`);
+        
+        try {
+          const defaultOptions = {
+            assignedTo: null,
+            status: null,
+            limit: 10,
+            sortBy: "priority" // 'priority', 'created', 'updated'
+          };
+          
+          // Merge options with defaults
+          const mergedOptions = { ...defaultOptions, ...options };
+          
+          // Filter tasks
+          let tasks = [...globalThis.SCRATCHPAD.tasks];
+          
+          // Filter by assignee if specified
+          if (mergedOptions.assignedTo) {
+            tasks = tasks.filter(task => task.assignedTo === mergedOptions.assignedTo);
+          }
+          
+          // Filter by status if specified
+          if (mergedOptions.status) {
+            tasks = tasks.filter(task => task.status === mergedOptions.status);
+          }
+          
+          // Sort tasks
+          switch (mergedOptions.sortBy) {
+            case "priority":
+              tasks.sort((a, b) => b.priority - a.priority);
+              break;
+            case "created":
+              tasks.sort((a, b) => b.created - a.created);
+              break;
+            case "updated":
+              tasks.sort((a, b) => b.updated - a.updated);
+              break;
+            default:
+              tasks.sort((a, b) => b.priority - a.priority);
+          }
+          
+          // Apply limit
+          if (mergedOptions.limit > 0) {
+            tasks = tasks.slice(0, mergedOptions.limit);
+          }
+          
+          console.log(`[SCRATCHPAD] Retrieved ${tasks.length} tasks`);
+          return tasks;
+        } catch (error) {
+          console.error("[SCRATCHPAD] Error getting tasks:", error);
+          return [];
+        }
+      },
+      
+      // Set a shared variable in the workspace
+      setVariable: function(key, value, scope = "global") {
+        console.log(`[SCRATCHPAD] Setting variable: ${key} in scope ${scope}`);
+        
+        try {
+          // Ensure variables object exists for the scope
+          if (!globalThis.SCRATCHPAD.workspace.variables[scope]) {
+            globalThis.SCRATCHPAD.workspace.variables[scope] = {};
+          }
+          
+          // Set the variable
+          globalThis.SCRATCHPAD.workspace.variables[scope][key] = value;
+          
+          console.log(`[SCRATCHPAD] Variable ${key} set in scope ${scope}`);
+          return true;
+        } catch (error) {
+          console.error("[SCRATCHPAD] Error setting variable:", error);
+          return false;
+        }
+      },
+      
+      // Get a shared variable from the workspace
+      getVariable: function(key, scope = "global") {
+        console.log(`[SCRATCHPAD] Getting variable: ${key} from scope ${scope}`);
+        
+        try {
+          // Check if scope exists
+          if (!globalThis.SCRATCHPAD.workspace.variables[scope]) {
+            console.log(`[SCRATCHPAD] Scope ${scope} does not exist`);
+            return null;
+          }
+          
+          // Check if variable exists
+          if (!(key in globalThis.SCRATCHPAD.workspace.variables[scope])) {
+            console.log(`[SCRATCHPAD] Variable ${key} not found in scope ${scope}`);
+            return null;
+          }
+          
+          // Get the variable
+          return globalThis.SCRATCHPAD.workspace.variables[scope][key];
+        } catch (error) {
+          console.error("[SCRATCHPAD] Error getting variable:", error);
+          return null;
+        }
+      },
+      
+      // Add a note to the workspace
+      addNote: function(category, title, content) {
+        console.log(`[SCRATCHPAD] Adding note: ${title} in category ${category}`);
+        
+        try {
+          // Ensure category exists
+          if (!globalThis.SCRATCHPAD.workspace.notes[category]) {
+            globalThis.SCRATCHPAD.workspace.notes[category] = {};
+          }
+          
+          // Create note ID
+          const id = `note_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+          
+          // Create note object
+          const note = {
+            id: id,
+            title: title,
+            content: content,
+            created: Date.now(),
+            updated: Date.now()
+          };
+          
+          // Add note to scratchpad
+          globalThis.SCRATCHPAD.workspace.notes[category][id] = note;
+          
+          console.log(`[SCRATCHPAD] Note added, ID: ${id}`);
+          return id;
+        } catch (error) {
+          console.error("[SCRATCHPAD] Error adding note:", error);
+          return null;
+        }
+      },
+      
+      // Get notes from the workspace
+      getNotes: function(category = null) {
+        console.log(`[SCRATCHPAD] Getting notes${category ? ` for category ${category}` : ''}`);
+        
+        try {
+          if (category) {
+            // Get notes for a specific category
+            if (!globalThis.SCRATCHPAD.workspace.notes[category]) {
+              console.log(`[SCRATCHPAD] Category ${category} does not exist`);
+              return {};
+            }
+            
+            return globalThis.SCRATCHPAD.workspace.notes[category];
+          } else {
+            // Get all notes
+            return globalThis.SCRATCHPAD.workspace.notes;
+          }
+        } catch (error) {
+          console.error("[SCRATCHPAD] Error getting notes:", error);
+          return {};
+        }
+      },
+      
+      // Add a code snippet to the workspace
+      addCodeSnippet: function(language, title, code, description = "") {
+        console.log(`[SCRATCHPAD] Adding code snippet: ${title} in language ${language}`);
+        
+        try {
+          // Ensure language exists
+          if (!globalThis.SCRATCHPAD.workspace.code_snippets[language]) {
+            globalThis.SCRATCHPAD.workspace.code_snippets[language] = {};
+          }
+          
+          // Create snippet ID
+          const id = `snippet_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+          
+          // Create snippet object
+          const snippet = {
+            id: id,
+            title: title,
+            code: code,
+            description: description,
+            created: Date.now(),
+            updated: Date.now()
+          };
+          
+          // Add snippet to scratchpad
+          globalThis.SCRATCHPAD.workspace.code_snippets[language][id] = snippet;
+          
+          console.log(`[SCRATCHPAD] Code snippet added, ID: ${id}`);
+          return id;
+        } catch (error) {
+          console.error("[SCRATCHPAD] Error adding code snippet:", error);
+          return null;
+        }
+      },
+      
+      // Get code snippets from the workspace
+      getCodeSnippets: function(language = null) {
+        console.log(`[SCRATCHPAD] Getting code snippets${language ? ` for language ${language}` : ''}`);
+        
+        try {
+          if (language) {
+            // Get snippets for a specific language
+            if (!globalThis.SCRATCHPAD.workspace.code_snippets[language]) {
+              console.log(`[SCRATCHPAD] Language ${language} does not exist`);
+              return {};
+            }
+            
+            return globalThis.SCRATCHPAD.workspace.code_snippets[language];
+          } else {
+            // Get all snippets
+            return globalThis.SCRATCHPAD.workspace.code_snippets;
+          }
+        } catch (error) {
+          console.error("[SCRATCHPAD] Error getting code snippets:", error);
+          return {};
+        }
+      },
+      
+      // Add an insight to the workspace
+      addInsight: function(content, source = "agent", tags = []) {
+        console.log(`[SCRATCHPAD] Adding insight from ${source}`);
+        
+        try {
+          // Create insight ID
+          const id = `insight_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+          
+          // Create insight object
+          const insight = {
+            id: id,
+            content: content,
+            source: source,
+            tags: tags,
+            timestamp: Date.now()
+          };
+          
+          // Add insight to scratchpad
+          globalThis.SCRATCHPAD.workspace.insights.push(insight);
+          
+          console.log(`[SCRATCHPAD] Insight added, ID: ${id}`);
+          return id;
+        } catch (error) {
+          console.error("[SCRATCHPAD] Error adding insight:", error);
+          return null;
+        }
+      },
+      
+      // Get insights from the workspace
+      getInsights: function(options = {}) {
+        console.log(`[SCRATCHPAD] Getting insights with options: ${JSON.stringify(options)}`);
+        
+        try {
+          const defaultOptions = {
+            source: null,
+            tag: null,
+            limit: 10
+          };
+          
+          // Merge options with defaults
+          const mergedOptions = { ...defaultOptions, ...options };
+          
+          // Filter insights
+          let insights = [...globalThis.SCRATCHPAD.workspace.insights];
+          
+          // Filter by source if specified
+          if (mergedOptions.source) {
+            insights = insights.filter(insight => insight.source === mergedOptions.source);
+          }
+          
+          // Filter by tag if specified
+          if (mergedOptions.tag) {
+            insights = insights.filter(insight => insight.tags.includes(mergedOptions.tag));
+          }
+          
+          // Sort by timestamp (newest first)
+          insights.sort((a, b) => b.timestamp - a.timestamp);
+          
+          // Apply limit
+          if (mergedOptions.limit > 0) {
+            insights = insights.slice(0, mergedOptions.limit);
+          }
+          
+          console.log(`[SCRATCHPAD] Retrieved ${insights.length} insights`);
+          return insights;
+        } catch (error) {
+          console.error("[SCRATCHPAD] Error getting insights:", error);
+          return [];
+        }
+      },
+      
+      // Register an agent with the scratchpad
+      registerAgent: function(name, capabilities = []) {
+        console.log(`[SCRATCHPAD] Registering agent: ${name}`);
+        
+        try {
+          // Create agent object
+          const agent = {
+            status: "active",
+            capabilities: capabilities,
+            last_active: Date.now()
+          };
+          
+          // Add agent to scratchpad
+          globalThis.SCRATCHPAD.agents[name] = agent;
+          
+          console.log(`[SCRATCHPAD] Agent ${name} registered`);
+          return true;
+        } catch (error) {
+          console.error("[SCRATCHPAD] Error registering agent:", error);
+          return false;
+        }
+      },
+      
+      // Update agent status
+      updateAgentStatus: function(name, status) {
+        console.log(`[SCRATCHPAD] Updating agent ${name} status to ${status}`);
+        
+        try {
+          // Check if agent exists
+          if (!globalThis.SCRATCHPAD.agents[name]) {
+            console.error(`[SCRATCHPAD] Agent ${name} not found`);
+            return false;
+          }
+          
+          // Validate status
+          const validStatuses = ["active", "inactive", "busy"];
+          if (!validStatuses.includes(status)) {
+            console.error(`[SCRATCHPAD] Invalid status: ${status}`);
+            return false;
+          }
+          
+          // Update the agent
+          globalThis.SCRATCHPAD.agents[name].status = status;
+          globalThis.SCRATCHPAD.agents[name].last_active = Date.now();
+          
+          console.log(`[SCRATCHPAD] Agent ${name} status updated to ${status}`);
+          return true;
+        } catch (error) {
+          console.error("[SCRATCHPAD] Error updating agent status:", error);
+          return false;
+        }
+      },
+      
+      // Get agents from the scratchpad
+      getAgents: function(status = null) {
+        console.log(`[SCRATCHPAD] Getting agents${status ? ` with status ${status}` : ''}`);
+        
+        try {
+          // Get agents
+          const agents = { ...globalThis.SCRATCHPAD.agents };
+          
+          // Filter by status if specified
+          if (status) {
+            Object.keys(agents).forEach(name => {
+              if (agents[name].status !== status) {
+                delete agents[name];
+              }
+            });
+          }
+          
+          console.log(`[SCRATCHPAD] Retrieved ${Object.keys(agents).length} agents`);
+          return agents;
+        } catch (error) {
+          console.error("[SCRATCHPAD] Error getting agents:", error);
+          return {};
+        }
+      }
+    };
+    
+    // Add methods to globalThis
+    globalThis.SCRATCHPAD_SYSTEM = ScratchpadSystem;
+    
+    // Add convenience methods directly to globalThis
+    globalThis.sendAgentMessage = ScratchpadSystem.sendMessage;
+    globalThis.readAgentMessages = ScratchpadSystem.readMessages;
+    globalThis.createAgentTask = ScratchpadSystem.createTask;
+    globalThis.updateAgentTask = ScratchpadSystem.updateTask;
+    globalThis.getAgentTasks = ScratchpadSystem.getTasks;
+    globalThis.setSharedVariable = ScratchpadSystem.setVariable;
+    globalThis.getSharedVariable = ScratchpadSystem.getVariable;
+    globalThis.addWorkspaceNote = ScratchpadSystem.addNote;
+    globalThis.getWorkspaceNotes = ScratchpadSystem.getNotes;
+    globalThis.addCodeSnippet = ScratchpadSystem.addCodeSnippet;
+    globalThis.getCodeSnippets = ScratchpadSystem.getCodeSnippets;
+    globalThis.addInsight = ScratchpadSystem.addInsight;
+    globalThis.getInsights = ScratchpadSystem.getInsights;
+    globalThis.registerScratchpadAgent = ScratchpadSystem.registerAgent;
+    globalThis.updateAgentStatus = ScratchpadSystem.updateAgentStatus;
+    globalThis.getScratchpadAgents = ScratchpadSystem.getAgents;
+    
+    // Register the system agent
+    ScratchpadSystem.registerAgent("system", ["coordination", "notification"]);
+    
+    // Add system banner if banners exist
+    if (Array.isArray(globalThis.nextResponsePrepend)) {
+      // Check if we already have a scratchpad banner
+      const hasScratchpadBanner = globalThis.nextResponsePrepend.some(banner => 
+        banner.includes("SCRATCHPAD") || banner.includes("MULTI-AGENT")
+      );
+      
+      if (!hasScratchpadBanner) {
+        globalThis.nextResponsePrepend.push("🗒️ [SCRATCHPAD SYSTEM: ACTIVE]");
+      }
+    }
+    
+    console.log("✅ Scratchpad Communication System initialized successfully");
+  } catch (error) {
+    console.error("❌ Error initializing scratchpad:", error);
+  }
+})();
+</script>
+
+## Agent Interaction Example
+
+The following example demonstrates how multiple agents can interact using the scratchpad system:
+
+```javascript
+// Register agents
+registerScratchpadAgent("planner", ["planning", "coordination"]);
+registerScratchpadAgent("coder", ["coding", "implementation"]);
+registerScratchpadAgent("reviewer", ["review", "quality"]);
+
+// Planner creates a task for the coder
+const taskId = createAgentTask("Implement memory system", "coder", {
+  priority: 8,
+  details: "Create a memory system that integrates short-term and long-term memory"
+});
+
+// Coder reads messages
+const messages = readAgentMessages("coder");
+console.log(messages[0].content); // "New task assigned: Implement memory system"
+
+// Coder updates task status
+updateAgentTask(taskId, "in_progress");
+
+// Coder adds a code snippet
+addCodeSnippet("javascript", "Memory System Initialization", `
+function initializeMemorySystem() {
+  // Initialize memory subsystems
+  initializeShortTermMemory();
+  initializeEpisodicMemory();
+  initializeSemanticMemory();
+  
+  console.log("Memory system initialized");
+}
+`);
+
+// Coder completes the task
+updateAgentTask(taskId, "completed", {
+  files_modified: ["memory_system.js", "short_term_memory.js", "episodic_memory.js"]
+});
+
+// Reviewer reads tasks
+const completedTasks = getAgentTasks({
+  status: "completed",
+  sortBy: "updated"
+});
+
+// Reviewer adds insights
+addInsight("Memory system implementation follows good practices but lacks error handling", 
+           "reviewer", 
+           ["code_quality", "memory_system"]);
+```
+
+## Multi-Agent Collaboration
+
+The scratchpad system enables multiple agents to collaborate effectively by:
+
+1. **Message Exchange:** Agents can communicate directly with each other.
+2. **Task Delegation:** Complex tasks can be broken down and distributed among specialized agents.
+3. **Shared Knowledge:** Information and insights are accessible to all agents.
+4. **Coordination:** Agents can coordinate their actions to solve complex problems.
+5. **Persistent State:** The system maintains state across agent interactions, enabling long-running collaborative efforts.
+
+## Required Behavior
+
+1. **Agent Registration:** Register all agents before using the scratchpad system.
+2. **Message Checking:** Regularly check for messages directed to your agent.
+3. **Task Management:** Update task status as work progresses.
+4. **Knowledge Sharing:** Add important insights and code snippets to the workspace.
+5. **Status Updates:** Keep your agent status up to date to signal availability.
+
+## Integration with Memory System
+
+The scratchpad system integrates with the memory system as follows:
+
+```javascript
+// Store important insights in semantic memory
+function persistInsightsToMemory() {
+  const insights = getInsights({ limit: 20 });
+  
+  for (const insight of insights) {
+    MEMORY_SYSTEM.storeKnowledge(insight.tags.join('_'), {
+      category: "insight",
+      content: insight.content,
+      importance: "medium",
+      source: `scratchpad_${insight.source}`,
+      timestamp: insight.timestamp
+    });
+  }
+}
+
+// Store task history in episodic memory
+function persistTasksToMemory() {
+  const completedTasks = getAgentTasks({ status: "completed", limit: 10 });
+  
+  for (const task of completedTasks) {
+    MEMORY_SYSTEM.storeConversation({
+      role: "system",
+      content: `Task completed: ${task.description}`,
+      metadata: {
+        type: "task_completion",
+        task_id: task.id,
+        assigned_to: task.assignedTo,
+        result: task.result
+      }
+    });
+  }
+}
+```

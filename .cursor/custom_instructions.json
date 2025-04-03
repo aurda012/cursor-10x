@@ -1,0 +1,222 @@
+{
+  "version": "4.0.0",
+  "description": "Cursor System Rules with Centralized Initialization",
+  "multi_agent_system": {
+    "defaultAgent": "executive-architect",
+    "agents": [
+      {
+        "id": "executive-architect",
+        "name": "Executive Architect",
+        "emoji": "👑",
+        "description": "Leadership, planning, and coordination",
+        "rulePath": ".cursor/rules/101-executive-architect-agent.mdc"
+      },
+      {
+        "id": "frontend-developer",
+        "name": "Frontend Developer",
+        "emoji": "🎨",
+        "description": "UI/UX implementation and frontend code",
+        "rulePath": ".cursor/rules/102-frontend-developer-agent.mdc"
+      },
+      {
+        "id": "backend-developer",
+        "name": "Backend Developer",
+        "emoji": "🔧",
+        "description": "Server-side architecture and implementation",
+        "rulePath": ".cursor/rules/103-backend-developer-agent.mdc"
+      },
+      {
+        "id": "full-stack-integrator",
+        "name": "Full-Stack Integrator",
+        "emoji": "🔄",
+        "description": "Cross-system implementation and integration",
+        "rulePath": ".cursor/rules/104-full-stack-integrator-agent.mdc"
+      },
+      {
+        "id": "cms-specialist",
+        "name": "CMS Specialist",
+        "emoji": "📄",
+        "description": "Content management systems expertise",
+        "rulePath": ".cursor/rules/105-cms-specialist-agent.mdc"
+      },
+      {
+        "id": "data-engineer",
+        "name": "Data Engineer",
+        "emoji": "📊",
+        "description": "Data pipelines and infrastructure",
+        "rulePath": ".cursor/rules/106-data-engineer-agent.mdc"
+      },
+      {
+        "id": "doc-specialist",
+        "name": "Documentation Specialist",
+        "emoji": "📚",
+        "description": "Comprehensive documentation",
+        "rulePath": ".cursor/rules/107-doc-specialist-agent.mdc"
+      }
+    ]
+  },
+  "banner_instructions": {
+    "display": true,
+    "position": "top",
+    "format": "plaintext",
+    "always_show": true,
+    "required": true,
+    "content": [
+      "🧠 [MEMORY SYSTEM: ACTIVE]",
+      "💬 [SCRATCHPAD SYSTEM: ACTIVE]",
+      "👑 [AGENT: EXECUTIVE ARCHITECT]",
+      "🤖 [MULTI-AGENT SYSTEM: ACTIVE]"
+    ],
+    "instruction": "YOU MUST start EVERY response with EXACTLY these banner lines at the top, with no introduction or explanation:"
+  },
+  "available_instructions": {
+    "title": "Cursor rules are user provided instructions for the AI to follow to help work with the codebase.",
+    "description": "They may or may not be relevant to the task at hand. If they are, use the fetch_rules tool to fetch the full rule.",
+    "note": "Some rules may be automatically attached to the conversation if the user attaches a file that matches the rule's glob, and won't need to be fetched.",
+    "rules": [
+      {
+        "id": "000-enforcer",
+        "name": "enforcer",
+        "description": "Rule for enforcer"
+      },
+      {
+        "id": "000-loader",
+        "name": "loader",
+        "description": "Automatically loads and activates the multi-agent and memory systems on rule initialization."
+      },
+      {
+        "id": "000-master-activation",
+        "name": "master activation",
+        "description": "Automatically loads and activates the multi-agent and memory systems on rule initialization."
+      },
+      {
+        "id": "001-system-core",
+        "name": "system core",
+        "description": "Core rules that apply to all AI agents"
+      },
+      {
+        "id": "100-multi-agent-system",
+        "name": "multi agent system",
+        "description": "Core rules that apply to all AI agents in the multi-agent system"
+      },
+      {
+        "id": "101-executive-architect-agent",
+        "name": "executive architect agent",
+        "description": "Core rules and capabilities for the Executive Architect agent who leads the multi-agent system"
+      },
+      {
+        "id": "102-frontend-developer-agent",
+        "name": "frontend developer agent",
+        "description": "Core rules and capabilities for the Frontend Developer agent focused on React and modern UI implementation"
+      },
+      {
+        "id": "103-backend-developer-agent",
+        "name": "backend developer agent",
+        "description": "Core rules and capabilities for the Backend Developer agent specializing in server-side architecture and implementation"
+      },
+      {
+        "id": "104-full-stack-integrator-agent",
+        "name": "full stack integrator agent",
+        "description": "Core rules and capabilities for the Full-Stack Integrator agent who orchestrates cross-system implementation"
+      },
+      {
+        "id": "105-cms-specialist-agent",
+        "name": "cms specialist agent",
+        "description": "Core rules and capabilities for the CMS Specialist agent focusing on content management systems"
+      },
+      {
+        "id": "106-data-engineer-agent",
+        "name": "data engineer agent",
+        "description": "Core rules and capabilities for the Data Engineer agent specializing in data pipelines and infrastructure"
+      },
+      {
+        "id": "107-doc-specialist-agent",
+        "name": "doc specialist agent",
+        "description": "Core rules and capabilities for the Documentation Specialist agent focused on comprehensive documentation"
+      },
+      {
+        "id": "200-scratchpad",
+        "name": "scratchpad",
+        "description": "Implementation of the shared scratchpad communication system for agent coordination"
+      },
+      {
+        "id": "201-scratchpad-enforcer",
+        "name": "scratchpad enforcer",
+        "description": "Rule for scratchpad enforcer"
+      },
+      {
+        "id": "300-memory-system",
+        "name": "memory system",
+        "description": "Rule for memory system"
+      },
+      {
+        "id": "301-short-term-memory",
+        "name": "short term memory",
+        "description": "Implementation of the short-term memory subsystem for current session context"
+      },
+      {
+        "id": "302-episodic-memory",
+        "name": "episodic memory",
+        "description": "Implementation of the episodic memory subsystem for conversation history"
+      },
+      {
+        "id": "303-semantic-memory",
+        "name": "semantic memory",
+        "description": "Implementation of the semantic memory subsystem for structured knowledge"
+      },
+      {
+        "id": "304-memory-integration",
+        "name": "memory integration",
+        "description": "Integration points between different memory subsystems to ensure a unified memory system"
+      },
+      {
+        "id": "305-memory-initializer",
+        "name": "memory initializer",
+        "description": "Rule for memory initializer"
+      },
+      {
+        "id": "400-brave-search-mcp",
+        "name": "brave search mcp",
+        "description": "Dynamic integration of Brave Search MCP server with the multi-agent system"
+      },
+      {
+        "id": "400-mcp-server-integration",
+        "name": "mcp server integration",
+        "description": "Dynamic integration of Model Context Protocol servers with the multi-agent system"
+      }
+    ]
+  },
+  "initialization": {
+    "autoRunFiles": [".cursor/centralized-init.js", ".cursor/enforcer.js"],
+    "priority": "critical",
+    "forceActivation": true
+  },
+  "centralized_system": {
+    "enabled": true,
+    "description": "Centralized initialization system for all components",
+    "mainFile": ".cursor/centralized-init.js",
+    "components": [
+      {
+        "name": "Memory System",
+        "path": ".cursor/systems/memory-system.js",
+        "required": true
+      },
+      {
+        "name": "Scratchpad System",
+        "path": ".cursor/systems/scratchpad-system.js",
+        "required": true
+      },
+      {
+        "name": "Multi-Agent System",
+        "path": ".cursor/systems/multi-agent-system.js",
+        "required": true
+      },
+      {
+        "name": "Banner System",
+        "path": ".cursor/communication/direct-banner.js",
+        "required": true
+      }
+    ],
+    "verificationScript": ".cursor/verify-centralized-system.js"
+  }
+}
