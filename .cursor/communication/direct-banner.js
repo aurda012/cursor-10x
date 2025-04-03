@@ -112,58 +112,80 @@ globalThis.BANNER_SYSTEM_ACTIVE = true;
       }]`
     );
 
-    // Add legacy banner indicator
-    globalThis.nextResponsePrepend.push(`🚩 [BANNER SYSTEM: LEGACY]`);
-
     console.log(
-      "✅ Banners set with legacy system:",
+      "✅ Standard banners set with legacy system:",
       globalThis.nextResponsePrepend
     );
-
-    // Explicitly tell Claude to add these banners
-    console.log(
-      "⚠️ CLAUDE INSTRUCTION: START EVERY RESPONSE WITH THESE BANNERS:"
-    );
-    for (const banner of globalThis.nextResponsePrepend) {
-      console.log(`  ${banner}`);
-    }
-
-    // Add even more explicit instructions for Claude in a format it's more likely to notice
-    console.log(
-      "YOU MUST start YOUR RESPONSE with THESE BANNER LINES at the TOP, with NO introduction:"
-    );
-    globalThis.nextResponsePrepend.forEach((banner) => {
-      console.log(banner);
-    });
   } catch (error) {
     console.error("❌ Error in banner system:", error);
 
-    // Emergency fallback banner
+    // Fallback with standard banners
     if (!Array.isArray(globalThis.nextResponsePrepend)) {
       globalThis.nextResponsePrepend = [];
     }
 
-    globalThis.nextResponsePrepend.push(
-      "🚨 [EMERGENCY BANNER: SYSTEM STATUS UNKNOWN]"
-    );
-    console.log("⚠️ Emergency banners set");
+    if (globalThis.nextResponsePrepend.length === 0) {
+      globalThis.nextResponsePrepend.push("🤖 [MULTI-AGENT SYSTEM: ACTIVE]");
+      globalThis.nextResponsePrepend.push("🧠 [MEMORY SYSTEM: ACTIVE]");
+      globalThis.nextResponsePrepend.push("📝 [SCRATCHPAD SYSTEM: ACTIVE]");
+      globalThis.nextResponsePrepend.push("👑 [AGENT: EXECUTIVE ARCHITECT]");
+    }
+    console.log("✅ Standard banners set as fallback");
   }
 })();
 
 // Export banner function for direct access by centralized-init.js
 module.exports = {
+  initialized: true,
+  // Add a flag to prevent infinite recursion
+  _forceInProgress: false,
+
   forceBanners: function () {
-    // Try to use the centralized banner system if available
-    if (
-      globalThis.BANNER_SYSTEM &&
-      typeof globalThis.BANNER_SYSTEM.forceBanners === "function"
-    ) {
-      return globalThis.BANNER_SYSTEM.forceBanners();
+    // Prevent recursive calls that cause stack overflow
+    if (this._forceInProgress) {
+      console.log("⚠️ Preventing recursive forceBanners call");
+      return globalThis.nextResponsePrepend || [];
     }
 
-    // Legacy mode - re-run the self-invoking function
-    delegateToCentralizedBanner();
-    return globalThis.nextResponsePrepend || [];
+    try {
+      this._forceInProgress = true;
+
+      // Try to use the centralized banner system if available
+      if (
+        globalThis.BANNER_SYSTEM &&
+        globalThis.BANNER_SYSTEM !== this &&
+        typeof globalThis.BANNER_SYSTEM.forceBanners === "function"
+      ) {
+        console.log("🔄 Delegating to another banner system instance");
+        return globalThis.BANNER_SYSTEM.forceBanners();
+      }
+
+      // Legacy mode - re-run the self-invoking function
+      if (typeof delegateToCentralizedBanner === "function") {
+        delegateToCentralizedBanner();
+      } else {
+        console.log("⚠️ delegateToCentralizedBanner function not found");
+        // Standard fallback
+        if (!Array.isArray(globalThis.nextResponsePrepend)) {
+          globalThis.nextResponsePrepend = [];
+        }
+        if (globalThis.nextResponsePrepend.length === 0) {
+          globalThis.nextResponsePrepend.push(
+            "🤖 [MULTI-AGENT SYSTEM: ACTIVE]"
+          );
+          globalThis.nextResponsePrepend.push("🧠 [MEMORY SYSTEM: ACTIVE]");
+          globalThis.nextResponsePrepend.push("📝 [SCRATCHPAD SYSTEM: ACTIVE]");
+          globalThis.nextResponsePrepend.push(
+            "👑 [AGENT: EXECUTIVE ARCHITECT]"
+          );
+        }
+      }
+
+      return globalThis.nextResponsePrepend || [];
+    } finally {
+      // Always reset the flag when done
+      this._forceInProgress = false;
+    }
   },
 };
 

@@ -1,15 +1,118 @@
-# Cursor-10x for Cursor AI
+# Cursor10x for Cursor AI
 
-<div align="center">
-  <p><em>A portable multi-agent system architecture with memory persistence and inter-agent communication</em></p>
+<div align="center" style="background: linear-gradient(to bottom, #1a1a1a, #2a2a2a); padding: 30px; border-radius: 15px; margin-bottom: 20px;">
+  <img src="assets/images/CURSOR10X.jpeg" alt="Cursor10x Logo" width="650" style="margin-bottom: 20px; border-radius: 12px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);">
+  
+  <p style="color: #f0f0f0;"><em>A portable multi-agent system architecture with memory persistence, inter-agent communication, and custom task creation and management workflow</em></p>
   
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-  [![Version](https://img.shields.io/badge/Version-1.1.0-green.svg)](https://github.com/user/cursor-systems)
+  [![Version](https://img.shields.io/badge/Version-1.2.0-green.svg)](https://github.com/user/cursor-systems)
 </div>
 
 ## 📚 Overview
 
 Cursor Systems is a sophisticated multi-agent architecture designed to enhance AI assistants with persistent memory, inter-agent communication, and specialized agent capabilities. The system enables AI assistants to maintain context across conversations, collaborate through multiple specialized personas, and leverage a structured communication system for coordinated problem-solving.
+
+## 🆕 What's New in Cursor 10x
+
+### Reorganized Directory Structure
+
+The Cursor 10x directory structure has been completely reorganized to improve maintainability, clarity, and scalability:
+
+- **Modular Organization**: Files are now organized into logical directories by function
+- **Core System Separation**: Critical system files are isolated in the `/core` directory
+- **Backward Compatibility**: Core files are automatically copied back to the root for compatibility
+- **Improved Documentation**: Comprehensive directory structure documentation
+
+### New Directory Layout
+
+```
+.cursor/
+├── agents/                # Agent implementations and instructions
+├── communication/         # Banner system and inter-agent messaging tools
+├── core/                  # Critical system files (centralized-init.js, enforcer.js, etc.)
+├── db/                    # Database files for memory and scratchpad
+├── docs/                  # System documentation and integration guides
+├── legacy/                # Deprecated files maintained for backward compatibility
+├── rules/                 # MDC rule files that define system behavior
+├── scripts/               # Utility scripts for maintenance and setup
+│   ├── agents/            # Agent management scripts
+│   ├── memory/            # Memory system utilities
+│   └── response/          # Response processing utilities
+├── systems/               # Core system implementations
+├── tasks/                 # Task definitions and tracking
+├── tests/                 # System test files
+└── utils/                 # Shared utility functions
+```
+
+### Key Improvements
+
+1. **Enhanced Reliability**:
+
+   - Centralized error handling in core system files
+   - Improved system recovery mechanisms
+   - Backward compatibility layer for legacy imports
+
+2. **Better Maintainability**:
+
+   - Logical grouping of related files
+   - Clear separation of concerns
+   - Reduced root directory clutter
+
+3. **Extended Functionality**:
+
+   - Improved agent-switching capabilities
+   - Enhanced memory persistence across sessions
+   - More robust inter-agent communication
+
+4. **New Developer Tools**:
+   - Setup scripts for easy system initialization
+   - Symlink utilities for maintaining compatibility
+   - Comprehensive testing framework
+
+### Upgrade Instructions
+
+If you're upgrading from a previous version of Cursor Systems:
+
+1. **Backup your existing configuration**:
+
+   ```bash
+   cp -r .cursor .cursor-backup
+   ```
+
+2. **Install the new version**:
+
+   ```bash
+   # Clone the repository
+   git clone https://github.com/user/cursor-systems.git
+
+   # Copy the new .cursor directory
+   cp -r cursor-systems/.cursor /path/to/your/project/
+   ```
+
+3. **Run the setup script**:
+
+   ```bash
+   cd /path/to/your/project/.cursor
+   node scripts/copy-core-files.js
+   ```
+
+4. **Verify installation**:
+   ```bash
+   node .cursor/scripts/verify-systems.js
+   ```
+
+### Successful Reorganization
+
+The Cursor 10x system has been successfully reorganized with a more logical structure. All core features remain fully functional, with improved organization and maintainability:
+
+- **Core System Files**: Moved to `.cursor/core/` with copies in the root for compatibility
+- **Utility Scripts**: Organized in `.cursor/scripts/` with subdirectories for specific functions
+- **Documentation**: Consolidated in `.cursor/docs/` for easier reference
+- **Legacy Code**: Preserved in `.cursor/legacy/` for reference and backward compatibility
+- **Tests**: Organized by subsystem in `.cursor/tests/` for better test management
+
+The verification script confirms that all systems are properly initialized and functioning after the reorganization, ensuring a smooth transition to the new structure.
 
 ### 🌟 Key Features
 
@@ -21,6 +124,7 @@ Cursor Systems is a sophisticated multi-agent architecture designed to enhance A
 - **Centralized Initialization**: Single-entry point system initialization with robust error recovery
 - **Auto-Recovery**: Automatic detection and creation of missing system components
 - **Pre/Post Response Hooks**: Automatic memory operations before and after each response
+- **Intelligent Task Assignment**: Automatic delegation of tasks to specialized agents based on capability matching
 
 ## 🤖 Agent Specializations
 
@@ -75,6 +179,7 @@ Enables structured communication between agents through:
 - Task creation, assignment, and status updates
 - Shared workspace variables for collaborative state
 - Agent registration and capability advertising
+- Intelligent task delegation based on agent capabilities
 
 ### 5. Banner System
 
@@ -152,6 +257,66 @@ Switch between specialized agents naturally in conversations:
 "Switch to the Frontend Developer agent for this UI work"
 "I need the Documentation Specialist to help with API docs"
 "Let's use the Backend Developer for database design"
+```
+
+### Intelligent Task Assignment
+
+The system automatically delegates tasks to the most suitable agents based on capability matching:
+
+#### How It Works
+
+1. **Task Analysis**: The system examines tasks based on:
+
+   - Target file path and extension (e.g., `.jsx` → Frontend, `/api/` → Backend)
+   - Task description and prompt content
+   - Required technical capabilities
+
+2. **Capability Matching**: Tasks are matched with agent specializations:
+
+   - UI/UX and frontend code → Frontend Developer
+   - Server-side and API tasks → Backend Developer
+   - Integration tasks → Full-Stack Integrator
+   - Content management → CMS Specialist
+   - Data pipeline tasks → Data Engineer
+   - Documentation tasks → Documentation Specialist
+
+3. **Assignment Commands**:
+
+   ```
+   "assign task 003"      # Assign a specific task to the best agent
+   "delegate task 003"    # Alternative syntax for task assignment
+   ```
+
+4. **Automatic Assignment**:
+
+   - When starting a task with `start task`, the system automatically assigns the most suitable agent
+   - The task is updated with an `ASSIGNED_AGENT` field in the task file
+   - The system switches to the assigned agent to implement the task
+
+5. **Agent Implementation**:
+   - The assigned agent follows the task's prompt as detailed instructions
+   - The agent focuses on the target file specified in the task
+   - Implementation follows the specialized agent's expertise and capabilities
+   - Task completion is managed through the Executive Architect
+
+#### Benefits
+
+- **Specialized Expertise**: Each task is handled by the agent with the most relevant skills
+- **Efficient Workflows**: No manual agent switching needed for task implementation
+- **Clear Ownership**: Task assignments are explicitly tracked in task files
+- **Consistent Implementation**: Each agent applies their specialized knowledge to implementations
+- **Automatic Detection**: The system intelligently determines the best agent without user intervention
+
+#### Example
+
+```
+> start task 003
+
+Task #003: "Implement user authentication UI components"
+File: src/components/Auth/LoginForm.jsx
+Assigned to: Frontend Developer (🎨)
+
+Switching to Frontend Developer agent for implementation...
 ```
 
 ### System APIs
@@ -284,60 +449,131 @@ More explanation about using the rule...
 
 The system includes various rule categories:
 
-| Category      | Purpose                       | Examples                                |
-| ------------- | ----------------------------- | --------------------------------------- |
-| System Core   | Core system functionality     | `000-loader.mdc`, `001-system-core.mdc` |
-| Agents        | Agent definitions             | `101-executive-architect-agent.mdc`     |
-| Communication | Inter-agent communication     | `200-scratchpad.mdc`                    |
-| Memory        | Memory subsystems             | `300-memory-system.mdc`                 |
-| Integration   | External services integration | `400-mcp-server-integration.mdc`        |
+| Category        | Purpose                       | Examples                                |
+| --------------- | ----------------------------- | --------------------------------------- |
+| System Core     | Core system functionality     | `000-loader.mdc`, `001-system-core.mdc` |
+| Agents          | Agent definitions             | `101-executive-architect-agent.mdc`     |
+| Communication   | Inter-agent communication     | `200-scratchpad.mdc`                    |
+| Memory          | Memory subsystems             | `300-memory-system.mdc`                 |
+| Integration     | External services integration | `400-mcp-server-integration.mdc`        |
+| Task Management | Task workflow and assignment  | `400-tasks-workflow.mdc`                |
+
+### Task Workflow Management
+
+The system includes a comprehensive task management workflow defined in `400-tasks-workflow.mdc` with these key capabilities:
+
+1. **Structured Task Storage**:
+
+   - Tasks stored as individual files in `tasks/` directory
+   - Central task index in `tasks.json` for status tracking
+   - Each task includes ID, title, target file, description, and implementation prompt
+
+2. **Task Progression Workflow**:
+
+   - Linear task flow: pending → in-progress → done
+   - Focus on one active task at a time
+   - Sequential task execution in ID order
+
+3. **Task Assignment System**:
+
+   - Automatic analysis of task requirements from file path and description
+   - Intelligent matching with agent capabilities
+   - Assignment tracked with `ASSIGNED_AGENT` field in task files
+
+4. **Command-Driven Interface**:
+
+   - `list tasks` - Display all tasks in a table format
+   - `task status` - Show summary statistics
+   - `start task` - Begin next pending task with automatic agent assignment
+   - `complete task` - Mark current task as done
+   - `assign task [ID]` - Explicitly assign a task to the most suitable agent
+   - `delegate task [ID]` - Alternative assignment command
+   - Additional commands for task creation and management
+
+5. **Implementation Focus**:
+   - Each task specifies a target file for implementation
+   - The assigned agent uses the task prompt as detailed implementation instructions
+   - The Executive Architect maintains overall task coordination
 
 ## 📁 Project Structure
 
 ```
-.cursor/
-├── agents/                         # Agent implementations
-│   ├── multi-agent-system.js       # Core agent controller
-│   ├── executive-architect/        # Executive Architect agent
-│   │   └── instructions.md         # Detailed agent instructions
-│   ├── frontend-developer/         # Frontend Developer agent
-│   │   └── instructions.md         # Detailed agent instructions
-│   └── ...                         # Other specialized agents
-├── communication/                  # Communication systems
-│   ├── activate.js                 # System activation
-│   ├── direct-banner.js            # Banner management
-│   └── custom_instructions.js      # Instructions generator
-├── db/                             # Database components
-│   ├── memory-system.db            # SQLite memory database
-│   └── scratchpad-system.db        # Communication storage database
-├── centralized-init.js             # Centralized system initialization
-├── enforcer.js                     # System enforcement and recovery
-├── fix-systems.js                  # Automatic system repair
-├── memory-fix.js                   # Memory system enhancements
-├── pre-response-hook.js            # Pre-response processing
-├── post-response-hook.js           # Post-response processing
-├── test-all-systems.js             # Comprehensive system test
-├── quick-test.js                   # Fast system verification
-├── rules/                          # MDC rule files
-│   ├── 000-master-activation.mdc   # Master system activator
-│   ├── 000-enforcer.mdc            # System enforcement and activation
-│   ├── 001-system-core.mdc         # Core system definition
-│   ├── 100-multi-agent-system.mdc  # Multi-agent system definition
-│   ├── 101-executive-architect-agent.mdc # Agent definitions
-│   ├── 200-scratchpad.mdc          # Communication system
-│   ├── 201-scratchpad-enforcer.mdc # Scratchpad enforcement
-│   ├── 300-memory-system.mdc       # Memory architecture
-│   ├── 301-short-term-memory.mdc   # Short-term memory implementation
-│   ├── 302-episodic-memory.mdc     # Episodic memory implementation
-│   ├── 303-semantic-memory.mdc     # Semantic memory implementation
-│   ├── 304-memory-integration.mdc  # Memory subsystem integration
-│   ├── 305-memory-initializer.mdc  # Memory system bootstrapper
-│   └── 400-*.mdc                   # Integration modules
-├── systems/                        # Core system implementations
-│   ├── memory-system.js            # Memory system implementation
-│   ├── scratchpad-system.js        # Inter-agent communication
-│   └── multi-agent-system.js       # Agent coordination system
-├── package.json                    # Dependencies
+project/
+├── .cursor/
+│   ├── agents/                         # Agent implementations
+│   │   ├── multi-agent-system.js       # Core agent controller
+│   │   ├── executive-architect/        # Executive Architect agent
+│   │   │   └── instructions.md         # Detailed agent instructions
+│   │   ├── frontend-developer/         # Frontend Developer agent
+│   │   │   └── instructions.md         # Detailed agent instructions
+│   │   └── ...                         # Other specialized agents
+│   ├── communication/                  # Communication systems
+│   │   ├── activate.js                 # System activation
+│   │   ├── direct-banner.js            # Banner management
+│   │   └── custom_instructions.js      # Instructions generator
+│   ├── core/                           # Critical system files
+│   │   ├── centralized-init.js         # Centralized system initialization
+│   │   ├── centralized-banner.js       # Banner management system
+│   │   ├── enforcer.js                 # System enforcement and recovery
+│   │   ├── index.js                    # Main entry point
+│   │   ├── pre-response-hook.js        # Pre-response processing
+│   │   ├── post-response-hook.js       # Post-response processing
+│   │   └── system-compatibility.js     # System compatibility layer
+│   ├── db/                             # Database components
+│   │   ├── memory-system.db            # SQLite memory database
+│   │   └── scratchpad-system.db        # Communication storage database
+│   ├── docs/                           # Documentation files
+│   │   ├── README-AGENTS.md            # Agent system documentation
+│   │   ├── README-MEMORY.md            # Memory system documentation
+│   │   └── BANNER-INTEGRATION-PLAN.md  # Banner system documentation
+│   ├── scripts/                        # Utility scripts
+│   │   ├── copy-core-files.js          # Script to copy core files to root
+│   │   ├── setup-symlinks.js           # Script to create symlinks from core to root
+│   │   ├── agents/                     # Agent management scripts
+│   │   │   ├── switch-agent.js         # Agent switching utility
+│   │   │   ├── reset-active-agent.js   # Reset active agent utility
+│   │   │   └── list-agents.js          # List available agents utility
+│   │   ├── memory/                     # Memory management scripts
+│   │   │   ├── memory-fix.js           # Memory system repair utility
+│   │   │   ├── memory-init.js          # Memory initialization utility
+│   │   │   ├── enhance-systems.js      # Memory enhancement utility
+│   │   │   └── activate-auto-memory.js # Auto-memory activation utility
+│   │   └── response/                   # Response processing utilities
+│   │       └── auto-response-processor.js # Response processing utility
+│   ├── rules/                          # MDC rule files
+│   │   ├── 000-master-activation.mdc   # Master system activator
+│   │   ├── 000-enforcer.mdc            # System enforcement and activation
+│   │   ├── 001-system-core.mdc         # Core system definition
+│   │   ├── 100-multi-agent-system.mdc  # Multi-agent system definition
+│   │   ├── 101-executive-architect-agent.mdc # Agent definitions
+│   │   ├── 200-scratchpad.mdc          # Communication system
+│   │   ├── 201-scratchpad-enforcer.mdc # Scratchpad enforcement
+│   │   ├── 300-memory-system.mdc       # Memory architecture
+│   │   ├── 301-short-term-memory.mdc   # Short-term memory implementation
+│   │   ├── 302-episodic-memory.mdc     # Episodic memory implementation
+│   │   ├── 303-semantic-memory.mdc     # Semantic memory implementation
+│   │   ├── 304-memory-integration.mdc  # Memory subsystem integration
+│   │   ├── 305-memory-initializer.mdc  # Memory system bootstrapper
+│   │   └── 400-tasks-workflow.mdc      # Task workflow management system
+│   ├── systems/                        # Core system implementations
+│   │   ├── memory-system.js            # Memory system implementation
+│   │   ├── scratchpad-system.js        # Inter-agent communication
+│   │   └── multi-agent-system.js       # Agent coordination system
+│   ├── cursor.json                     # Manual Cursor settings
+│   ├── mcp.json                        # MCP integrations
+│   ├── package-lock.json               # Dependencies
+│   ├── package.json                    # Dependencies
+│   └── ...                             # And so on...
+├── docs/                           # Documentation files
+│   ├── architecture.md             # System architecture
+│   ├── blueprint.md                # System blueprint
+│   └── implementation.md           # Implementation guide/plan
+├── tasks/                          # Task storage directory
+│   ├── task_001.txt                # Individual task files
+│   ├── task_002.txt                # Each with ID, target file, prompt
+│   └── tasks.json                  # Central task index and status tracking
+├── .cursorignore                   # Prevent indexing large directories
+├── .gitignore                      # Ignore files
 └── README.md                       # This documentation
 ```
 
@@ -371,26 +607,98 @@ Verify system functionality with the included test scripts:
 
 ```bash
 # Comprehensive test of all systems
-node .cursor/test-all-systems.js
-
-# Quick test for scratchpad and banner systems
-node .cursor/quick-test.js
+node .cursor/tests/system/test-all-systems.js
 
 # Test the memory system
-node .cursor/check-memory.js
+node .cursor/tests/memory/check-memory.js
 
 # Test the scratchpad system
-node .cursor/check-scratchpad.js
+node .cursor/tests/system/check-scratchpad.js
 
 # Test agent switching
-node .cursor/check-agent.js
+node .cursor/tests/system/check-agent.js
 
 # Test banner displays
-node .cursor/test-banner-system.js
+node .cursor/tests/banner/test-banner-system.js
 
-# Fix all systems if needed
-node .cursor/fix-systems.js
+# Test task assignment capabilities
+node .cursor/tests/tasks/test-task-assignment.js
+
+# Run verification tests
+node .cursor/tests/verification/run-verification.js
 ```
+
+You can also use the system repair script if tests indicate issues:
+
+```bash
+# Fix all systems if needed
+node .cursor/scripts/fix-systems.js
+```
+
+## 🔧 System Maintenance
+
+Cursor10x includes several utility scripts to help maintain and manage the system effectively.
+
+### Core System Maintenance
+
+These scripts help maintain the core system files and ensure backward compatibility:
+
+```bash
+# Copy core files to root directory for backward compatibility
+node .cursor/scripts/copy-core-files.js
+
+# Create symlinks from core files to root directory (alternative to copying)
+node .cursor/scripts/setup-symlinks.js
+
+# Fix systems if they're not functioning correctly
+node .cursor/scripts/fix-systems.js
+
+# Verify that all systems are properly initialized
+node .cursor/scripts/verify-systems.js
+```
+
+### Agent Management
+
+These scripts help manage the multi-agent system:
+
+```bash
+# List all available agents
+node .cursor/scripts/agents/list-agents.js
+
+# Switch to a specific agent
+node .cursor/scripts/agents/switch-agent.js frontend-developer
+
+# Reset to the default agent (Executive Architect)
+node .cursor/scripts/agents/reset-active-agent.js
+```
+
+### Memory System Management
+
+These scripts help manage the memory system:
+
+```bash
+# Initialize the memory system
+node .cursor/scripts/memory/memory-init.js
+
+# Fix memory issues
+node .cursor/scripts/memory/memory-fix.js
+
+# Enhance memory systems with additional capabilities
+node .cursor/scripts/memory/enhance-systems.js
+
+# Activate automatic memory
+node .cursor/scripts/memory/activate-auto-memory.js
+```
+
+### Directory Structure Documentation
+
+For a comprehensive overview of the directory structure and organization, refer to:
+
+```bash
+cat .cursor/DIRECTORY_STRUCTURE.md
+```
+
+This file explains the purpose of each directory, critical files that should not be deleted, and how backward compatibility is maintained.
 
 ## 🔧 Customization
 
@@ -486,20 +794,6 @@ MULTI_AGENT_SYSTEM.registerAgent("security-specialist", {
 });
 ```
 
-### Using Existing Rules as Templates
-
-When creating a new agent, you can reference existing rule files as templates:
-
-1. **View existing agent rules** in the `.cursor/rules/` directory (e.g., `101-executive-architect-agent.mdc`)
-2. **Use the `fetch_rules` tool** in Cursor to retrieve a specific rule structure:
-   ```
-   // Example: Fetch the Frontend Developer agent rule as reference
-   fetch_rules("102-frontend-developer-agent")
-   ```
-3. **Copy and adapt** the structure, replacing agent-specific details
-4. **Maintain consistency** with existing agent structure for seamless integration
-5. **Reference common subsystems** like the scratchpad and memory systems using the `@file` syntax
-
 ### Required Rule Sections
 
 For proper agent integration, all agent rule files must include:
@@ -559,5 +853,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 <div align="center">
-  <p>Built with ❤️ by the Cursor 10x team</p>
+  <p>Built with ❤️ by the Cursor10x team</p>
+  <p>Version 1.2.0: Now with improved organization and maintainability</p>
 </div>

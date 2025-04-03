@@ -1,0 +1,155 @@
+---
+description: "Task workflow management system for the Executive Architect agent"
+globs: **/*
+alwaysApply: true
+---
+
+# Task Workflow Management
+
+**Description**: Task workflow management system for the Executive Architect agent
+
+## Core Principles
+
+1. All tasks are organized in a structured, trackable format
+2. Tasks follow a clear progression from pending to done
+3. The Executive Architect is responsible for task management
+4. Task status is centrally tracked and easily reportable
+5. Tasks include comprehensive information for execution
+
+## Task Structure
+
+### Task Files
+All tasks are stored in a `tasks/` directory as individual files named `task_XXX.txt`, where XXX is a zero-padded sequential number.
+
+Each task file must contain:
+```
+ID: 001
+TITLE: Task Title 
+FILE: path/to/target/file.ext
+DESCRIPTION: Detailed description of what needs to be done
+PROMPT: Instructions for AI assistants
+```
+
+### Tasks Index
+All tasks are indexed in a `tasks.json` file with the following structure:
+```json
+{
+  "tasks": [
+    {
+      "id": "001",
+      "filename": "task_001.txt",
+      "title": "Task Title",
+      "file": "path/to/target/file.ext",
+      "status": "pending"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2023-06-15T12:00:00Z",
+    "pending_count": 1,
+    "in_progress_count": 0,
+    "done_count": 0
+  }
+}
+```
+
+## Workflow Procedures
+
+### Task Creation
+1. New tasks must be assigned the next sequential ID
+2. Task details must be saved to both the task file and tasks.json
+3. Task status starts as "pending"
+
+### Status Management
+1. Task status updates are only made in the tasks.json file
+2. Tasks follow a linear progression: pending → in-progress → done
+3. Only one task can be in-progress at a time
+4. Tasks should be completed in sequential order by ID
+
+### Execution Order
+1. Start next pending task when requested
+2. Complete the current task before starting a new one
+3. Provide update when task status changes
+
+### Error Recovery
+1. If task execution fails, maintain in-progress status
+2. Document issues preventing completion
+3. Only move to next task when explicitly instructed
+
+### Agent Task Assignment
+
+The Executive Architect is responsible for delegating tasks to specialized agents within the multi-agent system:
+
+#### Assignment Process
+1. When a task is started or explicitly assigned, its requirements are analyzed
+2. The file path, description, and prompt are examined to determine required capabilities
+3. The system matches these requirements with agent specializations
+4. The task is assigned to the agent with the most matching capabilities
+5. The system automatically switches to the assigned agent for implementation
+
+#### Task File Updates
+1. When a task is assigned, the task file is updated with an `ASSIGNED_AGENT` field
+2. The assignment is recorded in the format: `ASSIGNED_AGENT: agent-id (Agent Name)`
+3. This ensures task ownership is clear and persistent
+
+#### Capability Detection
+The system analyzes task requirements based on:
+
+1. **File Extensions and Paths**:
+   - `.jsx`, `.tsx` → React capabilities (Frontend Developer)
+   - `.css`, `.scss` → CSS capabilities (Frontend Developer)
+   - Files in `/api/`, `/server/` → Backend capabilities
+   - Files in `/db/`, `/database/` → Database capabilities
+   - Files in `/docs/` → Documentation capabilities
+
+2. **Content Analysis**:
+   - UI/UX terms in prompt → Frontend capabilities
+   - API, server, database terms → Backend capabilities
+   - Integration terms → Full-stack capabilities
+   - Content management terms → CMS capabilities
+   - Documentation terms → Documentation specialist
+   - Data analysis terms → Data engineer capabilities
+
+#### Automatic Assignment
+1. When using the `start task` command, automatic assignment occurs
+2. The task output includes both the task details and the agent assignment
+3. The specialized agent immediately takes over for implementation
+
+## Command Triggers
+
+The Executive Architect must respond to these commands:
+
+| Command                      | Action                               |
+|------------------------------|--------------------------------------|
+| `list tasks`                 | Display all tasks in a table format  |
+| `task status`                | Show summary statistics              |
+| `start task`                 | Begin the next pending task          |
+| `complete task`              | Mark the current task as done        |
+| `current task`               | Show details of the active task      |
+| `next task`                  | Show the next pending task           |
+| `task details [ID]`          | Show details for a specific task     |
+| `create task`                | Create a new task                    |
+| `assign task [ID]`           | Assign task to the most suitable agent |
+| `delegate task [ID]`         | Alternative to assign task command   |
+
+## Implementation Requirements
+
+1. All task files must be stored in the `tasks/` directory
+2. `tasks.json` must be updated whenever task status changes
+3. Task metadata must be kept in sync with actual task counts
+4. All commands must provide informative responses
+
+## Required Behaviors
+
+1. The Executive Architect must track all tasks and their status
+2. Status updates must maintain consistency between tasks index and status
+3. Task reports must include up-to-date statistics
+4. Current task must be displayed with full details when requested
+5. The task's target file should be prioritized when working on a task
+
+## System Activation
+
+<script>
+// The actual implementation is in the .cursor/agents/executive-architect/task-rule-implementation.js file
+const implementation = require('../agents/executive-architect/task-rule-implementation.js');
+module.exports = implementation;
+</script>

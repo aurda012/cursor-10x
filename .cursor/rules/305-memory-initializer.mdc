@@ -3,6 +3,7 @@ description: "Memory intialization system"
 globs: **/*
 alwaysApply: true
 ---
+
 # Memory System Initializer
 
 This rule ensures that the memory system is properly initialized at the start of each chat session. It activates the various memory subsystems and ensures they're properly interconnected.

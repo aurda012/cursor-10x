@@ -1,0 +1,24 @@
+{
+  "tasks": [
+    {
+      "id": "001",
+      "filename": "task_001.txt",
+      "title": "Initialize Project Structure",
+      "file": "package.json",
+      "status": "pending"
+    },
+    {
+      "id": "002",
+      "filename": "task_002.txt",
+      "title": "Setup Core Dependencies",
+      "file": ".env.example",
+      "status": "pending"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2023-07-23T12:00:00Z",
+    "pending_count": 2,
+    "in_progress_count": 0,
+    "done_count": 0
+  }
+}

@@ -1,0 +1,5 @@
+ID: 002
+TITLE: Setup Core Dependencies
+FILE: .env.example
+DESCRIPTION: Install and configure all core dependencies required for the project based on the technical blueprint.
+PROMPT: Please install and configure the necessary dependencies for this project. This should include all core npm packages listed in the blueprint.md document. Initialize the package.json file with the correct project metadata, and ensure that all dependencies are properly saved. Configure any required environment variables and create sample configuration files as needed. 
