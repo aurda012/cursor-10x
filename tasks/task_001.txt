@@ -1,5 +1,4 @@
 ID: 001
 TITLE: Initialize Project Structure
 FILE: package.json
-DESCRIPTION: Create the initial project structure with all necessary directories and base configuration files according to the architecture diagram.
-PROMPT: Based on the architecture.md file, please create the basic folder structure and essential configuration files for the project. This should include all primary directories, package.json with initial dependencies, and configuration files for build tools. Ensure the structure aligns with the architectural requirements outlined in the blueprint.md file. 
+PROMPT: Based on the architecture.md file, please create the basic folder structure and essential configuration files for the project. This should include all primary directories, package.json with initial dependencies, and configuration files for build tools. Ensure the structure aligns with the architectural requirements. Create the initial project structure with all necessary directories and base configuration files according to the architecture diagram. 

@@ -4,133 +4,230 @@
  */
 
 const taskManager = require("./task-manager");
+const {
+  formatTaskTable,
+  formatTaskSummary,
+  formatTaskDetails,
+  formatTaskAssignment,
+} = require("./task-formatter");
 
 /**
- * Processes task-related commands
- * @param {string} command The user command
- * @returns {Object|null} Response data or null if not a task command
+ * Process a task command from the user
+ * @param {string} command - The command to process
+ * @returns {Object|null} Command result or null if not a task command
  */
 function processTaskCommand(command) {
   if (!command || typeof command !== "string") return null;
 
-  // Normalize command by converting to lowercase and trimming
+  // Normalize the command
   const normalizedCommand = command.toLowerCase().trim();
 
-  // Extract task ID if present (e.g., "task details 001")
-  const taskIdMatch = normalizedCommand.match(/\b(\d{3})\b/);
+  // Extract task ID if present
+  const taskIdMatch = normalizedCommand.match(/task.*?(\d+)/);
   const taskId = taskIdMatch ? taskIdMatch[1] : null;
 
-  // Handle different command types
-
   // 1. List tasks
-  if (
-    normalizedCommand.includes("list tasks") ||
-    normalizedCommand.includes("show tasks")
-  ) {
+  if (normalizedCommand.includes("list task")) {
     const tasks = taskManager.getAllTasks();
+
     return {
       commandType: "listTasks",
+      success: true,
       data: tasks,
-      response: formatTaskList(tasks),
+      response: formatTaskTable(tasks),
     };
   }
 
   // 2. Task status
   if (normalizedCommand.includes("task status")) {
-    const status = taskManager.getTaskStatusSummary();
+    const summary = taskManager.getTaskStatusSummary();
+
     return {
       commandType: "taskStatus",
-      data: status,
-      response: formatTaskStatus(status),
+      success: true,
+      data: summary,
+      response: formatTaskSummary(summary),
     };
   }
 
-  // 3. Start task
-  if (
-    normalizedCommand.includes("start task") ||
-    normalizedCommand.includes("begin task")
-  ) {
-    const task = taskManager.startNextTask();
-    if (!task) {
+  // 3. Start task (next pending)
+  if (normalizedCommand.includes("start task") && !taskId) {
+    const startedTask = taskManager.startNextTask();
+
+    if (!startedTask) {
       return {
         commandType: "startTask",
         success: false,
-        response: "There are no pending tasks to start.",
+        response: "No pending tasks available to start.",
       };
+    }
+
+    // Automatically assign to best agent
+    const assignResult = taskManager.assignTaskToAgent(startedTask.id);
+    let assignMessage = "";
+
+    if (assignResult.success) {
+      assignMessage = `\n\n${formatTaskAssignment(assignResult)}`;
     }
 
     return {
       commandType: "startTask",
       success: true,
-      data: task,
-      response: formatTaskStart(task),
+      data: startedTask,
+      response: `Started task #${startedTask.id}: ${startedTask.title}${assignMessage}`,
     };
   }
 
-  // 4. Complete task
-  if (
-    normalizedCommand.includes("complete task") ||
-    normalizedCommand.includes("finish task")
-  ) {
+  // 4. Start specific task
+  if (normalizedCommand.includes("start task") && taskId) {
+    const task = taskManager.getTaskById(taskId);
+
+    if (!task) {
+      return {
+        commandType: "startTask",
+        success: false,
+        response: `Task #${taskId} not found.`,
+      };
+    }
+
+    if (task.status === "in-progress") {
+      return {
+        commandType: "startTask",
+        success: false,
+        response: `Task #${taskId} is already in progress.`,
+      };
+    }
+
+    if (task.status === "done") {
+      return {
+        commandType: "startTask",
+        success: false,
+        response: `Task #${taskId} is already completed.`,
+      };
+    }
+
+    // There's already a task in progress
     const currentTask = taskManager.getCurrentTask();
+    if (currentTask && currentTask.id !== taskId) {
+      return {
+        commandType: "startTask",
+        success: false,
+        response: `Cannot start task #${taskId}. Task #${currentTask.id} is already in progress.`,
+      };
+    }
+
+    const success = taskManager.updateTaskStatus(taskId, "in-progress");
+
+    if (!success) {
+      return {
+        commandType: "startTask",
+        success: false,
+        response: `Failed to start task #${taskId}.`,
+      };
+    }
+
+    const startedTask = taskManager.getTaskDetails(taskId);
+
+    // Automatically assign to best agent
+    const assignResult = taskManager.assignTaskToAgent(startedTask.id);
+    let assignMessage = "";
+
+    if (assignResult.success) {
+      assignMessage = `\n\n${formatTaskAssignment(assignResult)}`;
+    }
+
+    return {
+      commandType: "startTask",
+      success: true,
+      data: startedTask,
+      response: `Started task #${taskId}: ${startedTask.title}${assignMessage}`,
+    };
+  }
+
+  // 5. Complete task
+  if (normalizedCommand.includes("complete task")) {
+    const currentTask = taskManager.getCurrentTask();
+
     if (!currentTask) {
       return {
         commandType: "completeTask",
         success: false,
-        response: "There is no task currently in progress.",
+        response: "No task is currently in progress.",
       };
     }
 
     const success = taskManager.completeCurrentTask();
+
+    if (!success) {
+      return {
+        commandType: "completeTask",
+        success: false,
+        response: `Failed to complete task #${currentTask.id}.`,
+      };
+    }
+
+    // Switch back to executive architect after task completion
+    if (
+      globalThis.MULTI_AGENT_SYSTEM &&
+      typeof globalThis.MULTI_AGENT_SYSTEM.switchToAgent === "function"
+    ) {
+      globalThis.MULTI_AGENT_SYSTEM.switchToAgent("executive-architect");
+    }
+
+    // Check if there are more tasks
+    const nextTask = taskManager.getNextPendingTask();
+    let nextTaskMessage = "";
+
+    if (nextTask) {
+      nextTaskMessage = `\n\nNext pending task: #${nextTask.id} - ${nextTask.title}`;
+    } else {
+      nextTaskMessage = "\n\nNo more pending tasks.";
+    }
+
     return {
       commandType: "completeTask",
-      success: success,
+      success: true,
       data: currentTask,
-      response: success
-        ? `Task #${currentTask.id}: "${currentTask.title}" has been completed.`
-        : `Failed to complete task #${currentTask.id}. Please try again.`,
+      response: `Completed task #${currentTask.id}: ${currentTask.title}${nextTaskMessage}`,
     };
   }
 
-  // 5. Current task
+  // 6. Current/Next task
   if (normalizedCommand.includes("current task")) {
     const currentTask = taskManager.getCurrentTask();
+
     if (!currentTask) {
       return {
         commandType: "currentTask",
         success: false,
-        response: "There is no task currently in progress.",
+        response: "No task is currently in progress.",
       };
     }
 
-    const taskDetails = taskManager.getTaskDetails(currentTask.id);
     return {
       commandType: "currentTask",
       success: true,
-      data: taskDetails,
-      response: formatTaskDetails(taskDetails),
+      data: currentTask,
+      response: formatTaskDetails(currentTask),
     };
   }
 
-  // 6. Next task
   if (normalizedCommand.includes("next task")) {
     const nextTask = taskManager.getNextPendingTask();
+
     if (!nextTask) {
       return {
         commandType: "nextTask",
         success: false,
-        response: "There are no pending tasks remaining.",
+        response: "No pending tasks available.",
       };
     }
 
-    const taskDetails = taskManager.getTaskDetails(nextTask.id);
     return {
       commandType: "nextTask",
       success: true,
-      data: taskDetails,
-      response: `The next task is #${nextTask.id}: "${
-        nextTask.title
-      }"\n\n${formatTaskDetails(taskDetails)}`,
+      data: nextTask,
+      response: formatTaskDetails(nextTask),
     };
   }
 
@@ -161,7 +258,7 @@ function processTaskCommand(command) {
       commandType: "createTask",
       success: true,
       response:
-        "Please provide the task details: title, file path, description, and prompt.",
+        "Please provide the task details: title, file path, and prompt.",
     };
   }
 
@@ -270,36 +367,10 @@ function formatTaskStart(task) {
 ## Target File
 \`${task.file || "N/A"}\`
 
-## Description
-${task.description}
-
 ## Prompt
 ${task.prompt}
 
 I'll coordinate the team to work on this task now.`;
-}
-
-/**
- * Formats task details for display
- * @param {Object} task The task details
- * @returns {string} Formatted task details
- */
-function formatTaskDetails(task) {
-  // Format status with emoji
-  let statusEmoji = "⏳";
-  if (task.status === "in-progress") statusEmoji = "🔄";
-  if (task.status === "done") statusEmoji = "✅";
-
-  return `# Task #${task.id}: ${task.title}
-
-- Status: ${statusEmoji} ${task.status}
-- Target File: \`${task.file || "N/A"}\`
-
-## Description
-${task.description}
-
-## Prompt
-${task.prompt}`;
 }
 
 /**
@@ -324,17 +395,11 @@ function generateProgressBar(percent) {
  * @returns {Object} The response object
  */
 function createNewTask(taskData) {
-  if (
-    !taskData ||
-    !taskData.title ||
-    !taskData.description ||
-    !taskData.prompt
-  ) {
+  if (!taskData || !taskData.title || !taskData.prompt) {
     return {
       commandType: "createTask",
       success: false,
-      response:
-        "Task creation failed. Title, description, and prompt are required.",
+      response: "Task creation failed. Title and prompt are required.",
     };
   }
 
@@ -346,44 +411,6 @@ function createNewTask(taskData) {
     data: newTask,
     response: `Task #${newTask.id}: "${newTask.title}" has been created.`,
   };
-}
-
-/**
- * Formats the task assignment result for display
- * @param {Object} assignmentResult The assignment result object
- * @returns {string} Formatted assignment message
- */
-function formatTaskAssignment(assignmentResult) {
-  const { agent, task } = assignmentResult;
-
-  // Format status with emoji
-  let statusEmoji = "⏳";
-  if (task.status === "in-progress") statusEmoji = "🔄";
-  if (task.status === "done") statusEmoji = "✅";
-
-  // Extract agent capabilities that matched the task
-  const capabilities = agent.capabilities || [];
-
-  return `# Task Assignment
-
-Task #${task.id}: "${task.title}" has been assigned to the ${agent.name}.
-
-## Task Details
-- Status: ${statusEmoji} ${task.status}
-- Target File: \`${task.file || "N/A"}\`
-
-## Assigned Agent
-- Name: ${agent.name}
-- Role: ${agent.emoji} ${agent.description || "Specialized agent"}
-- Capabilities: ${capabilities.join(", ")}
-
-## Agent Instructions
-The ${agent.name} will now work on this task with the following instructions:
-
-${task.prompt}
-
-The agent will focus on the file: \`${task.file || "N/A"}\`
-`;
 }
 
 module.exports = {

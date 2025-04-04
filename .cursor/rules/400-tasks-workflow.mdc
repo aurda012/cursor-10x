@@ -26,7 +26,6 @@ Each task file must contain:
 ID: 001
 TITLE: Task Title 
 FILE: path/to/target/file.ext
-DESCRIPTION: Detailed description of what needs to be done
 PROMPT: Instructions for AI assistants
 ```
 
@@ -40,7 +39,8 @@ All tasks are indexed in a `tasks.json` file with the following structure:
       "filename": "task_001.txt",
       "title": "Task Title",
       "file": "path/to/target/file.ext",
-      "status": "pending"
+      "status": "pending",
+      "prompt": "Instructions for AI assistants"
     }
   ],
   "metadata": {
@@ -81,7 +81,7 @@ The Executive Architect is responsible for delegating tasks to specialized agent
 
 #### Assignment Process
 1. When a task is started or explicitly assigned, its requirements are analyzed
-2. The file path, description, and prompt are examined to determine required capabilities
+2. The file path and prompt are examined to determine required capabilities
 3. The system matches these requirements with agent specializations
 4. The task is assigned to the agent with the most matching capabilities
 5. The system automatically switches to the assigned agent for implementation

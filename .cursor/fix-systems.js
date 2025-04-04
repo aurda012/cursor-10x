@@ -109,32 +109,58 @@ if (!multiAgentExists) {
     active_agent: "executive-architect",
     agents: {
       "executive-architect": {
+        id: "executive-architect",
         name: "Executive Architect",
+        emoji: "👑",
         description: "Technical leadership and project management",
+        capabilities: [
+          "planning",
+          "coordination",
+          "architecture",
+          "leadership",
+        ],
       },
       "frontend-developer": {
+        id: "frontend-developer",
         name: "Frontend Developer",
+        emoji: "🎨",
         description: "React and modern UI implementation",
+        capabilities: ["ui", "ux", "react", "css", "javascript", "frontend"],
       },
       "backend-developer": {
+        id: "backend-developer",
         name: "Backend Developer",
+        emoji: "🔧",
         description: "Server-side architecture and implementation",
+        capabilities: ["api", "server", "database", "security", "backend"],
       },
       "full-stack-integrator": {
+        id: "full-stack-integrator",
         name: "Full Stack Integrator",
+        emoji: "🔄",
         description: "Cross-system implementation",
+        capabilities: ["integration", "full-stack", "deployment", "workflow"],
       },
       "cms-specialist": {
+        id: "cms-specialist",
         name: "CMS Specialist",
+        emoji: "📄",
         description: "Content management systems",
+        capabilities: ["cms", "content-modeling", "content-management"],
       },
       "data-engineer": {
+        id: "data-engineer",
         name: "Data Engineer",
+        emoji: "📊",
         description: "Data pipelines and infrastructure",
+        capabilities: ["data-modeling", "analytics", "visualization"],
       },
       "doc-specialist": {
+        id: "doc-specialist",
         name: "Documentation Specialist",
+        emoji: "📚",
         description: "Comprehensive documentation",
+        capabilities: ["documentation", "technical-writing", "guides"],
       },
     },
 
@@ -142,15 +168,143 @@ if (!multiAgentExists) {
       return this.agents[this.active_agent];
     },
 
-    setActiveAgent: function (agentId) {
+    getAllAgents: function () {
+      return Object.values(this.agents);
+    },
+
+    // Add proper switchToAgent method for delegation
+    switchToAgent: function (agentId) {
       if (this.agents[agentId]) {
+        const previousAgent = this.active_agent;
         this.active_agent = agentId;
+
+        console.log(`Switched from ${previousAgent} to ${agentId}`);
+
+        // Update banner to indicate active agent
+        this.updateAgentBanner();
+
+        // Store the active agent in memory if available
+        if (globalThis.MEMORY_SYSTEM && globalThis.MEMORY_SYSTEM.storeContext) {
+          globalThis.MEMORY_SYSTEM.storeContext("active_agent", agentId);
+        }
+
+        // Notify via scratchpad if available
+        if (globalThis.SCRATCHPAD && globalThis.SCRATCHPAD.createMessage) {
+          globalThis.SCRATCHPAD.createMessage(
+            "system",
+            "all",
+            `Agent switched to: ${this.agents[agentId].name} (${this.agents[agentId].emoji})`
+          );
+        }
+
         return true;
       }
+      console.error(`Agent not found: ${agentId}`);
       return false;
     },
+
+    // Add findBestAgentForTask method for task delegation
+    findBestAgentForTask: function (
+      taskDescription,
+      requiredCapabilities = []
+    ) {
+      if (requiredCapabilities.length > 0) {
+        // Find agent with most matching capabilities
+        const agentMatches = Object.values(this.agents).map((agent) => {
+          const agentCapabilities = agent.capabilities || [];
+          const matchCount = agentCapabilities.filter((cap) =>
+            requiredCapabilities.includes(cap)
+          ).length;
+          return { agent, matchCount };
+        });
+
+        // Sort by match count (descending)
+        agentMatches.sort((a, b) => b.matchCount - a.matchCount);
+
+        // Return the best match if it has at least one capability match
+        if (agentMatches[0].matchCount > 0) {
+          return agentMatches[0].agent;
+        }
+      }
+
+      // Simple content-based matching as backup
+      taskDescription = taskDescription.toLowerCase();
+
+      if (
+        taskDescription.includes("frontend") ||
+        taskDescription.includes("ui") ||
+        taskDescription.includes("interface") ||
+        taskDescription.includes("react") ||
+        taskDescription.includes("component")
+      ) {
+        return this.agents["frontend-developer"];
+      }
+
+      if (
+        taskDescription.includes("backend") ||
+        taskDescription.includes("server") ||
+        taskDescription.includes("api") ||
+        taskDescription.includes("database")
+      ) {
+        return this.agents["backend-developer"];
+      }
+
+      if (
+        taskDescription.includes("integration") ||
+        taskDescription.includes("full-stack") ||
+        taskDescription.includes("deploy")
+      ) {
+        return this.agents["full-stack-integrator"];
+      }
+
+      if (
+        taskDescription.includes("content") ||
+        taskDescription.includes("cms")
+      ) {
+        return this.agents["cms-specialist"];
+      }
+
+      if (
+        taskDescription.includes("data") ||
+        taskDescription.includes("analytics")
+      ) {
+        return this.agents["data-engineer"];
+      }
+
+      if (
+        taskDescription.includes("documentation") ||
+        taskDescription.includes("docs") ||
+        taskDescription.includes("guide")
+      ) {
+        return this.agents["doc-specialist"];
+      }
+
+      // Fallback to executive architect
+      return this.agents["executive-architect"];
+    },
+
+    // Add banner update method
+    updateAgentBanner: function () {
+      if (!globalThis.nextResponsePrepend) {
+        globalThis.nextResponsePrepend = [];
+      }
+
+      const currentAgent = this.agents[this.active_agent];
+      if (!currentAgent) return;
+
+      // Remove any existing agent banners
+      globalThis.nextResponsePrepend = globalThis.nextResponsePrepend.filter(
+        (banner) => !banner.includes("[AGENT:")
+      );
+
+      // Add the current agent banner
+      const agentBanner = `${
+        currentAgent.emoji
+      } [AGENT: ${currentAgent.name.toUpperCase()}]`;
+      globalThis.nextResponsePrepend.push(agentBanner);
+    },
   };
-  console.log("✅ Multi-agent system created");
+  console.log("✅ Multi-agent system created with delegation capabilities");
 }
 
 // Ensure AGENT_SYSTEM reference is correct

@@ -13,8 +13,17 @@ if (!globalThis.HOOK_SYSTEM) {
     preHooks: [],
     postHooks: [],
 
-    registerPreHook: function (name, priority, callback) {
-      this.preHooks.push({ name, priority, callback });
+    registerPreHook: function (name, fn, priority = 100) {
+      // Check if hook already exists
+      const existingIndex = this.preHooks.findIndex((h) => h.name === name);
+      if (existingIndex >= 0) {
+        // Replace existing hook
+        this.preHooks[existingIndex] = { name, fn, priority };
+      } else {
+        // Add new hook
+        this.preHooks.push({ name, fn, priority });
+      }
+
       // Sort by priority (higher first)
       this.preHooks.sort((a, b) => b.priority - a.priority);
       console.log(
@@ -23,8 +32,17 @@ if (!globalThis.HOOK_SYSTEM) {
       return true;
     },
 
-    registerPostHook: function (name, priority, callback) {
-      this.postHooks.push({ name, priority, callback });
+    registerPostHook: function (name, fn, priority = 100) {
+      // Check if hook already exists
+      const existingIndex = this.postHooks.findIndex((h) => h.name === name);
+      if (existingIndex >= 0) {
+        // Replace existing hook
+        this.postHooks[existingIndex] = { name, fn, priority };
+      } else {
+        // Add new hook
+        this.postHooks.push({ name, fn, priority });
+      }
+
       // Sort by priority (higher first)
       this.postHooks.sort((a, b) => b.priority - a.priority);
       console.log(
@@ -33,46 +51,36 @@ if (!globalThis.HOOK_SYSTEM) {
       return true;
     },
 
-    runPreHooks: function (query) {
-      const results = [];
-      console.log(`Running ${this.preHooks.length} pre-response hooks...`);
-
+    runPreHooks: function (input) {
+      let result = input;
       for (const hook of this.preHooks) {
         try {
-          const result = hook.callback(query);
-          results.push({ name: hook.name, success: true, result });
+          console.log(`Running pre-hook: ${hook.name}`);
+          const hookResult = hook.fn(result);
+          if (hookResult) {
+            result = hookResult;
+          }
         } catch (error) {
-          console.error(`❌ Error in pre-hook ${hook.name}:`, error.message);
-          results.push({
-            name: hook.name,
-            success: false,
-            error: error.message,
-          });
+          console.error(`Error in pre-hook ${hook.name}: ${error.message}`);
         }
       }
-
-      return results;
+      return result;
     },
 
-    runPostHooks: function (response) {
-      const results = [];
-      console.log(`Running ${this.postHooks.length} post-response hooks...`);
-
+    runPostHooks: function (input) {
+      let result = input;
       for (const hook of this.postHooks) {
         try {
-          const result = hook.callback(response);
-          results.push({ name: hook.name, success: true, result });
+          console.log(`Running post-hook: ${hook.name}`);
+          const hookResult = hook.fn(result);
+          if (hookResult) {
+            result = hookResult;
+          }
         } catch (error) {
-          console.error(`❌ Error in post-hook ${hook.name}:`, error.message);
-          results.push({
-            name: hook.name,
-            success: false,
-            error: error.message,
-          });
+          console.error(`Error in post-hook ${hook.name}: ${error.message}`);
         }
       }
-
-      return results;
+      return result;
     },
   };
 
@@ -136,14 +144,20 @@ if (globalThis.MEMORY_SYSTEM) {
   // Register the memory hooks
   globalThis.HOOK_SYSTEM.registerPreHook(
     "memory-query-processor",
-    100,
-    (query) => globalThis.MEMORY_SYSTEM.processBeforeResponse(query)
+    function (query) {
+      globalThis.MEMORY_SYSTEM.processBeforeResponse(query);
+      return query;
+    },
+    100
   );
 
   globalThis.HOOK_SYSTEM.registerPostHook(
     "memory-response-processor",
-    100,
-    (response) => globalThis.MEMORY_SYSTEM.processAfterResponse(response)
+    function (response) {
+      globalThis.MEMORY_SYSTEM.processAfterResponse(response);
+      return response;
+    },
+    100
   );
 } else {
   console.warn("⚠️ Memory system not available for hook registration");

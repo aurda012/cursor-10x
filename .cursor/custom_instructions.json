@@ -187,7 +187,14 @@
     ]
   },
   "initialization": {
-    "autoRunFiles": [".cursor/centralized-init.js", ".cursor/enforcer.js"],
+    "autoRunFiles": [
+      ".cursor/centralized-init.js",
+      ".cursor/enforcer.js",
+      ".cursor/scripts/activate-memory-system.js",
+      ".cursor/core/activate-memory-hooks.js",
+      ".cursor/ensure-delegation.js",
+      ".cursor/ensure-memory-hooks.js"
+    ],
     "priority": "critical",
     "forceActivation": true
   },

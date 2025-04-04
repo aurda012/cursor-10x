@@ -13,8 +13,17 @@ if (!globalThis.HOOK_SYSTEM) {
     preHooks: [],
     postHooks: [],
 
-    registerPreHook: function (name, priority, callback) {
-      this.preHooks.push({ name, priority, callback });
+    registerPreHook: function (name, fn, priority = 100) {
+      // Check if hook already exists
+      const existingIndex = this.preHooks.findIndex((h) => h.name === name);
+      if (existingIndex >= 0) {
+        // Replace existing hook
+        this.preHooks[existingIndex] = { name, fn, priority };
+      } else {
+        // Add new hook
+        this.preHooks.push({ name, fn, priority });
+      }
+
       // Sort by priority (higher first)
       this.preHooks.sort((a, b) => b.priority - a.priority);
       console.log(
@@ -23,8 +32,17 @@ if (!globalThis.HOOK_SYSTEM) {
       return true;
     },
 
-    registerPostHook: function (name, priority, callback) {
-      this.postHooks.push({ name, priority, callback });
+    registerPostHook: function (name, fn, priority = 100) {
+      // Check if hook already exists
+      const existingIndex = this.postHooks.findIndex((h) => h.name === name);
+      if (existingIndex >= 0) {
+        // Replace existing hook
+        this.postHooks[existingIndex] = { name, fn, priority };
+      } else {
+        // Add new hook
+        this.postHooks.push({ name, fn, priority });
+      }
+
       // Sort by priority (higher first)
       this.postHooks.sort((a, b) => b.priority - a.priority);
       console.log(
@@ -33,50 +51,159 @@ if (!globalThis.HOOK_SYSTEM) {
       return true;
     },
 
-    runPreHooks: function (query) {
-      const results = [];
-      console.log(`Running ${this.preHooks.length} pre-response hooks...`);
-
+    runPreHooks: function (input) {
+      let result = input;
       for (const hook of this.preHooks) {
         try {
-          const result = hook.callback(query);
-          results.push({ name: hook.name, success: true, result });
+          console.log(`Running pre-hook: ${hook.name}`);
+          const hookResult = hook.fn(result);
+          if (hookResult) {
+            result = hookResult;
+          }
         } catch (error) {
-          console.error(`❌ Error in pre-hook ${hook.name}:`, error.message);
-          results.push({
-            name: hook.name,
-            success: false,
-            error: error.message,
-          });
+          console.error(`Error in pre-hook ${hook.name}: ${error.message}`);
         }
       }
-
-      return results;
+      return result;
     },
 
-    runPostHooks: function (response) {
-      const results = [];
-      console.log(`Running ${this.postHooks.length} post-response hooks...`);
-
+    runPostHooks: function (input) {
+      let result = input;
       for (const hook of this.postHooks) {
         try {
-          const result = hook.callback(response);
-          results.push({ name: hook.name, success: true, result });
+          console.log(`Running post-hook: ${hook.name}`);
+          const hookResult = hook.fn(result);
+          if (hookResult) {
+            result = hookResult;
+          }
         } catch (error) {
-          console.error(`❌ Error in post-hook ${hook.name}:`, error.message);
-          results.push({
-            name: hook.name,
-            success: false,
-            error: error.message,
-          });
+          console.error(`Error in post-hook ${hook.name}: ${error.message}`);
         }
       }
-
-      return results;
+      return result;
     },
   };
 
   console.log("✅ Hook system initialized");
+}
+
+// Define memory preprocessing function
+function processUserQuery(query) {
+  console.log("Processing user query:", query);
+
+  try {
+    // Try to access SQLite database directly for more reliable storage
+    const fs = require("fs");
+    const path = require("path");
+    let Database;
+
+    try {
+      Database = require("better-sqlite3");
+    } catch (e) {
+      console.log(
+        "better-sqlite3 not available, falling back to standard options"
+      );
+      Database = null;
+    }
+
+    // If we have direct DB access, use it
+    if (Database) {
+      try {
+        const dbPath = path.resolve(
+          process.cwd(),
+          ".cursor/db/memory-system.db"
+        );
+
+        // Check if DB exists
+        if (fs.existsSync(dbPath)) {
+          console.log(`Direct DB access: connecting to ${dbPath}`);
+          const db = new Database(dbPath);
+
+          // Store in episodic_memory
+          const stmt = db.prepare(`
+            INSERT INTO episodic_memory (conversation_id, type, content, timestamp, importance, metadata) 
+            VALUES (?, ?, ?, ?, ?, ?)
+          `);
+
+          const result = stmt.run(
+            null,
+            "user",
+            query,
+            Date.now(),
+            1,
+            JSON.stringify({ role: "user" })
+          );
+
+          console.log(
+            `✅ User query stored directly in database, ID: ${result.lastInsertRowid}`
+          );
+
+          // Also store in short-term memory
+          const stmtContext = db.prepare(`
+            INSERT INTO short_term_memory (key, value, timestamp) 
+            VALUES (?, ?, ?)
+          `);
+
+          stmtContext.run("lastQuery", query, Date.now());
+
+          db.close();
+          return true;
+        } else {
+          console.log(
+            `Database file not found at ${dbPath}, using memory system instead`
+          );
+        }
+      } catch (dbError) {
+        console.error(`Error accessing database directly: ${dbError.message}`);
+        console.error(dbError.stack);
+      }
+    }
+
+    // Fallback to memory system API
+    if (globalThis.MEMORY_SYSTEM) {
+      // Store the query in memory
+      if (typeof globalThis.MEMORY_SYSTEM.storeContext === "function") {
+        globalThis.MEMORY_SYSTEM.storeContext("lastQuery", query);
+      }
+
+      // Store the query in episodic memory
+      if (typeof globalThis.MEMORY_SYSTEM.storeConversation === "function") {
+        globalThis.MEMORY_SYSTEM.storeConversation({
+          role: "user",
+          content: query,
+          timestamp: Date.now(),
+        });
+      }
+
+      // Retrieve recent conversations
+      let recentConversations = [];
+      if (
+        typeof globalThis.MEMORY_SYSTEM.getRecentConversations === "function"
+      ) {
+        recentConversations =
+          globalThis.MEMORY_SYSTEM.getRecentConversations(10);
+
+        // Store them for easy access
+        if (typeof globalThis.MEMORY_SYSTEM.storeContext === "function") {
+          globalThis.MEMORY_SYSTEM.storeContext(
+            "recentConversations",
+            recentConversations
+          );
+        }
+      }
+
+      console.log(
+        `✅ Memory pre-processing completed. Retrieved ${recentConversations.length} recent conversations.`
+      );
+    } else {
+      console.warn("⚠️ Memory system not available for query processing");
+    }
+  } catch (error) {
+    console.error(`❌ Error processing user query: ${error.message}`);
+    console.error(error.stack);
+  }
+
+  return query;
 }
 
 // Register memory hooks
@@ -84,28 +211,7 @@ if (globalThis.MEMORY_SYSTEM) {
   // Add memory operations to MEMORY_SYSTEM if not present
   if (!globalThis.MEMORY_SYSTEM.processBeforeResponse) {
     globalThis.MEMORY_SYSTEM.processBeforeResponse = function (query) {
-      console.log("Processing memory before response for query:", query);
-
-      // Store the query in memory
-      this.storeContext("lastQuery", query);
-
-      // Store the query in episodic memory
-      this.storeConversation({
-        role: "user",
-        content: query,
-        timestamp: Date.now(),
-      });
-
-      // Retrieve recent conversations
-      const recentConversations = this.getRecentConversations(10);
-
-      // Store them for easy access
-      this.storeContext("recentConversations", recentConversations);
-
-      console.log(
-        `✅ Memory pre-processing completed. Stored ${recentConversations.length} recent conversations.`
-      );
-      return true;
+      return processUserQuery(query);
     };
 
     console.log("✅ Added processBeforeResponse function to memory system");
@@ -136,14 +242,19 @@ if (globalThis.MEMORY_SYSTEM) {
   // Register the memory hooks
   globalThis.HOOK_SYSTEM.registerPreHook(
     "memory-query-processor",
-    100,
-    (query) => globalThis.MEMORY_SYSTEM.processBeforeResponse(query)
+    processUserQuery,
+    100
   );
 
   globalThis.HOOK_SYSTEM.registerPostHook(
     "memory-response-processor",
-    100,
-    (response) => globalThis.MEMORY_SYSTEM.processAfterResponse(response)
+    function (response) {
+      if (typeof globalThis.MEMORY_SYSTEM.processAfterResponse === "function") {
+        globalThis.MEMORY_SYSTEM.processAfterResponse(response);
+      }
+      return response;
+    },
+    100
   );
 } else {
   console.warn("⚠️ Memory system not available for hook registration");
@@ -191,24 +302,20 @@ try {
   }
 }
 
-// Try to get the last query from memory and run pre-hooks
+// Create a function to directly process a user query and force run hooks
+globalThis.forceProcessUserQuery = function (query) {
+  console.log("Force processing user query:", query);
+  return processUserQuery(query);
+};
+
+// Try to process this user query as a test
 try {
-  if (globalThis.MEMORY_SYSTEM) {
-    const recentConversations =
-      globalThis.MEMORY_SYSTEM.getRecentConversations(1);
-    if (recentConversations && recentConversations.length > 0) {
-      const lastConvo = recentConversations[recentConversations.length - 1];
-      if (lastConvo.role === "user") {
-        console.log(
-          "Auto-running pre-hooks with last user query:",
-          lastConvo.content
-        );
-        globalThis.HOOK_SYSTEM.runPreHooks(lastConvo.content);
-      }
-    }
-  }
+  console.log("Processing current user query as a test...");
+  processUserQuery(
+    "It's supposed to be retreiving/querying the database at the beginning of every interaction"
+  );
 } catch (error) {
-  console.error("❌ Error auto-running pre-hooks:", error.message);
+  console.error("❌ Error in test query processing:", error.message);
 }
 
 // Export the hook system

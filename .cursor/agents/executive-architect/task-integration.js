@@ -150,7 +150,7 @@ function processMessage(message, context = {}) {
 
 /**
  * Creates a new task
- * @param {Object} taskData Task data (title, description, prompt)
+ * @param {Object} taskData Task data (title, file, prompt)
  * @returns {Object} Response object
  */
 function createTask(taskData) {

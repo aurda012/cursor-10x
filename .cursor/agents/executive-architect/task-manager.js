@@ -110,7 +110,6 @@ function getTaskDetails(id) {
     id: id,
     title: "",
     file: "",
-    description: "",
     prompt: "",
     status: task.status,
   };
@@ -126,15 +125,9 @@ function getTaskDetails(id) {
     } else if (line.startsWith("FILE:")) {
       details.file = line.substring("FILE:".length).trim();
       currentSection = null;
-    } else if (line.startsWith("DESCRIPTION:")) {
-      details.description = line.substring("DESCRIPTION:".length).trim();
-      currentSection = "description";
     } else if (line.startsWith("PROMPT:")) {
       details.prompt = line.substring("PROMPT:".length).trim();
       currentSection = "prompt";
-    } else if (currentSection === "description") {
-      // Append to description for multi-line descriptions
-      details.description += "\n" + line;
     } else if (currentSection === "prompt") {
       // Append to prompt for multi-line prompts
       details.prompt += "\n" + line;
@@ -146,7 +139,7 @@ function getTaskDetails(id) {
 
 /**
  * Creates a new task
- * @param {Object} taskData The task data (title, file, description, prompt)
+ * @param {Object} taskData The task data (title, file, prompt)
  * @returns {Object} The created task
  */
 function createTask(taskData) {
@@ -169,7 +162,6 @@ function createTask(taskData) {
   const fileContent = `ID: ${nextId}
 TITLE: ${taskData.title}
 FILE: ${taskData.file || "N/A"}
-DESCRIPTION: ${taskData.description}
 PROMPT: ${taskData.prompt}`;
 
   fs.writeFileSync(filePath, fileContent);
@@ -181,6 +173,7 @@ PROMPT: ${taskData.prompt}`;
     title: taskData.title,
     file: taskData.file || "N/A",
     status: "pending",
+    prompt: taskData.prompt,
   };
 
   tasksData.tasks.push(newTask);
@@ -318,7 +311,7 @@ function assignTaskToAgent(id) {
 
     // Find the best agent for this task
     const agent = globalThis.MULTI_AGENT_SYSTEM.findBestAgentForTask(
-      task.description,
+      task.prompt,
       capabilities
     );
 
@@ -466,8 +459,8 @@ function determineRequiredCapabilities(task) {
     }
   }
 
-  // Extract capabilities from prompt and description
-  const textToAnalyze = (task.prompt + " " + task.description).toLowerCase();
+  // Extract capabilities from prompt
+  const textToAnalyze = task.prompt.toLowerCase();
 
   // Frontend indicators
   if (

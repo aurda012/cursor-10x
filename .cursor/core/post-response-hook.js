@@ -63,23 +63,113 @@ if (!globalThis.HOOK_SYSTEM) {
 function processResponse(response) {
   console.log("Processing assistant response...");
 
-  // Store the response in memory if memory system exists
-  if (globalThis.MEMORY_SYSTEM) {
-    if (typeof globalThis.MEMORY_SYSTEM.processAfterResponse === "function") {
-      console.log("Storing response in memory system...");
-      return globalThis.MEMORY_SYSTEM.processAfterResponse(response);
-    } else {
-      console.log("Adding response to conversations...");
-      // Fallback direct storage
-      globalThis.MEMORY_SYSTEM.storeConversation({
-        role: "assistant",
-        content: response,
-        timestamp: Date.now(),
-      });
-      return true;
+  try {
+    // Get the last user query from memory system
+    let userMessage = "Unknown user message";
+    if (
+      globalThis.MEMORY_SYSTEM &&
+      typeof globalThis.MEMORY_SYSTEM.getContext === "function"
+    ) {
+      userMessage =
+        globalThis.MEMORY_SYSTEM.getContext("lastQuery") || userMessage;
     }
-  } else {
-    console.warn("⚠️ Memory system not available for response storage");
+
+    // Try to access SQLite database directly for more reliable storage
+    const fs = require("fs");
+    const path = require("path");
+    let Database;
+
+    try {
+      Database = require("better-sqlite3");
+    } catch (e) {
+      console.log(
+        "better-sqlite3 not available, falling back to standard options"
+      );
+      Database = null;
+    }
+
+    // If we have direct DB access, use it
+    if (Database) {
+      try {
+        const dbPath = path.resolve(
+          process.cwd(),
+          ".cursor/db/memory-system.db"
+        );
+
+        // Check if DB exists
+        if (fs.existsSync(dbPath)) {
+          console.log(`Direct DB access: connecting to ${dbPath}`);
+          const db = new Database(dbPath);
+
+          // Store in episodic_memory
+          const stmt = db.prepare(`
+            INSERT INTO episodic_memory (conversation_id, type, content, timestamp, importance, metadata) 
+            VALUES (?, ?, ?, ?, ?, ?)
+          `);
+
+          const result = stmt.run(
+            null,
+            "assistant",
+            JSON.stringify({
+              userMessage: userMessage,
+              assistantResponse: response,
+              conversationId: null,
+            }),
+            Date.now(),
+            1,
+            JSON.stringify({ role: "assistant" })
+          );
+
+          console.log(
+            `✅ Response stored directly in database, ID: ${result.lastInsertRowid}`
+          );
+
+          // Also store in short-term memory
+          const stmtContext = db.prepare(`
+            INSERT INTO short_term_memory (key, value, timestamp) 
+            VALUES (?, ?, ?)
+          `);
+
+          stmtContext.run("lastResponse", response, Date.now());
+
+          db.close();
+          return true;
+        } else {
+          console.log(
+            `Database file not found at ${dbPath}, using memory system instead`
+          );
+        }
+      } catch (dbError) {
+        console.error(`Error accessing database directly: ${dbError.message}`);
+      }
+    }
+
+    // Fallback to using memory system APIs
+    if (globalThis.MEMORY_SYSTEM) {
+      if (typeof globalThis.MEMORY_SYSTEM.processAfterResponse === "function") {
+        console.log(
+          "Storing response in memory system using processAfterResponse..."
+        );
+        return globalThis.MEMORY_SYSTEM.processAfterResponse(response);
+      } else {
+        console.log(
+          "Adding response to conversations using storeConversation..."
+        );
+        // Fallback direct storage
+        globalThis.MEMORY_SYSTEM.storeConversation({
+          role: "assistant",
+          content: response,
+          timestamp: Date.now(),
+        });
+        return true;
+      }
+    } else {
+      console.warn("⚠️ Memory system not available for response storage");
+      return false;
+    }
+  } catch (error) {
+    console.error(`❌ Error processing response: ${error.message}`);
+    console.error(error.stack);
     return false;
   }
 }
