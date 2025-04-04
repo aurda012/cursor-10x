@@ -1,4 +1,4 @@
-# Cursor10x for Cursor AI
+# 💻 10x Cursor AI with Cursor10x
 
 <div align="center" style="background: linear-gradient(to bottom, #1a1a1a, #2a2a2a); padding: 30px; border-radius: 15px; margin-bottom: 20px;">
   <img src="assets/images/CURSOR10X.jpeg" alt="Cursor10x Logo" width="650" style="margin-bottom: 20px; border-radius: 12px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);">
