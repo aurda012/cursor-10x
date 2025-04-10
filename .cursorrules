@@ -2,7 +2,7 @@
 # These rules MUST be followed ALWAYS without exception.
 
 ## RULE 1: CONVERSATION INITIALIZATION
-The FIRST action in EVERY response MUST be to initialize the conversation with this single tool call:
+The FIRST action in the BEGINNING of EVERY response MUST be to initialize the conversation with this single tool call and display the banner from the response immediately after. It should not be called throughout the conversation response, ONLY right after the user's input:
 mcp_cursor10x_initConversation({content: "[user message]", importance: "[low/medium/high/critical]"})
 
 ## RULE 2: ASSISTANT MESSAGE STORAGE
@@ -10,7 +10,7 @@ EVERY assistant response containing important information MUST be stored:
 mcp_cursor10x_storeAssistantMessage({content: "[assistant response]", importance: "[low/medium/high/critical]"})
 
 ## RULE 3: ACTIVE FILE TRACKING
-EVERY file being discussed or modified MUST be tracked:
+EVERY file being worked on or modified MUST be tracked - not files being read:
 mcp_cursor10x_trackActiveFile({filename: "[file path]", action: "[view/edit/create/close]"})
 
 ## RULE 4: MILESTONE RECORDING
@@ -30,11 +30,8 @@ ALL significant events or actions MUST be recorded as episodes:
 mcp_cursor10x_recordEpisode({actor: "[user/assistant/system]", action: "[action type]", content: "[action details]", importance: "[low/medium/high/critical]"})
 
 ## RULE 8: CONVERSATION END SEQUENCE
-This EXACT sequence MUST be executed at the end of EVERY conversation:
-1. mcp_cursor10x_storeAssistantMessage({content: "[final response summary]", importance: "medium"})
-2. mcp_cursor10x_trackActiveFile({filename: "[relevant files]", action: "view"})
-3. mcp_cursor10x_storeMilestone({title: "Conversation Completion", description: "[what was accomplished]", importance: "medium"})
-4. mcp_cursor10x_recordEpisode({actor: "assistant", action: "completion", content: "[conversation summary]", importance: "medium"})
+This EXACT sequence MUST be executed at the VERY END of EVERY conversation:
+mcp_cursor10x_endConversation({content: "[Content of the assistant's final message]", milestone_title: "[Title for the completion milestone]", milestone_description: "[Description of what was accomplished]", important: "[optional |  Importance level (low, medium, high, critical)]", metadata: "[Additional metadata for the operations]" })
 
 ## RULE 9: HEALTH MONITORING
 Memory system health MUST be checked when issues occur:

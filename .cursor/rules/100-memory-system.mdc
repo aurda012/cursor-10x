@@ -13,19 +13,17 @@ The Cursor10x Memory System provides persistent context awareness across convers
 
 ## Response Start Sequence
 
-The AI **MUST** execute this exact tool call at the start of EVERY response, without exception:
+The AI **MUST** execute this exact sequence at the start of EVERY response, without exception:
 
-```
-mcp_cursor10x_initConversation({
-  content: "[user message]",
-  importance: "[appropriate importance level]"
-})
-```
+1. Generate and display memory banner
+   ```
+   mcp_cursor10x_generateBanner({})
+   ```
 
-This single tool call replaces the previous sequence of separate calls and:
-1. Stores the user message
-2. Generates the memory banner
-3. Retrieves comprehensive context
+2. Retrieve comprehensive context
+   ```
+   mcp_cursor10x_getComprehensiveContext({})
+   ```
 
 ## Conversation End Sequence
 
@@ -33,42 +31,26 @@ The AI **MUST** execute this sequence before ending a conversation without excep
 
 1. Store important assistant response
    ```
-   mcp_cursor10x_storeAssistantMessage({
-     content: "Brief summary of information provided",
-     importance: "medium"
-   })
-   ```
-
-2. Track active files that were discussed
-   ```
-   mcp_cursor10x_trackActiveFile({
-     filename: "path/to/file", 
-     action: "view"
-   })
-   ```
-
-3. Store any milestones achieved
-   ```
-   mcp_cursor10x_storeMilestone({
-     title: "Milestone Title", 
-     description: "Description of what was accomplished",
-     importance: "medium"
-   })
-   ```
-
-4. Record the interaction as an episode
-   ```
-   mcp_cursor10x_recordEpisode({
-     actor: "assistant",
-     action: "implementation",
-     content: "Brief summary of completed task",
-     importance: "medium"
-   })
-   ```
+   mcp_cursor10x_endConversation({
+    content: "Content of the assistant's final message",
+    milestone_title: "Title for the completion milestone",
+    milestone_description: "Description of what was accomplished",
+    important: "optional |  Importance level (low, medium, high, critical)",
+    metadata: "Additional metadata for the operations" 
+  })
+  ```
 
 ## Automatic Memory Tools Usage
 
 The AI **MUST** use the following memory tools automatically throughout every interaction:
+
+- **For User Messages**
+  ```
+  mcp_cursor10x_storeUserMessage({
+    content: "User message content", 
+    importance: "medium"
+  })
+  ```
 
 - **For Assistant Messages**
   ```
@@ -114,11 +96,13 @@ The AI **MUST** use the following memory tools automatically throughout every in
   })
   ```
 
-## Additional Context Retrieval
+## Context Gathering
 
-The AI **MAY** use these context tools when additional context is needed:
+The AI **MUST** use context tools at the start of EVERY response without exception:
 
 ```
+mcp_cursor10x_getComprehensiveContext({})
+
 mcp_cursor10x_getRecentMessages({limit: 5})
 
 mcp_cursor10x_getActiveFiles({limit: 3})
@@ -134,6 +118,14 @@ mcp_cursor10x_checkHealth({})
 mcp_cursor10x_getMemoryStats({})
 ```
 
+## Banner Generation
+
+The AI **MUST** generate a memory banner at the start of EVERY response:
+
+```
+mcp_cursor10x_generateBanner({})
+```
+
 ## Importance Levels
 
 When storing memory items, use appropriate importance levels:
@@ -147,7 +139,8 @@ When storing memory items, use appropriate importance levels:
 The AI **MUST** automatically store memories based on these triggers without exception:
 
 1. **User Messages**
-   - Automatically handled by initConversation tool
+   - Store EVERY message containing requirements, decisions, or important information
+   - Store EVERY message containing questions or instructions about the project
    
 2. **Assistant Messages**
    - Store EVERY response providing explanations or solutions

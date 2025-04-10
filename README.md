@@ -271,7 +271,7 @@ Or you can visit [Turso](https://turso.tech/) and sign up and proceed to create 
 
 2. **Configure Cursor MCP:**
 
-Create `.cursor/mcp.json` in your project directory:
+Update `.cursor/mcp.json` in your project directory with the database url and turso auth token:
 
 ```json
 {
