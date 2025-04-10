@@ -1,0 +1,90 @@
+---
+description: Long-Term Memory (LTM) implementation for persistent milestones, requirements, decisions, and other important context
+globs: **/*
+alwaysApply: true
+---
+
+# Long-Term Memory System
+
+Long-Term Memory maintains persistent project information across sessions, including milestones, requirements, and decisions.
+
+## Milestone Storage
+
+The AI **MUST** store significant project achievements:
+
+```
+mcp_cursor10x_storeMilestone({
+  title: "Milestone Title", 
+  description: "Description", 
+  importance: "high"
+})
+```
+
+## Decision Storage
+
+The AI **MUST** record important project decisions:
+
+```
+mcp_cursor10x_storeDecision({
+  title: "Decision Title", 
+  content: "What was decided", 
+  reasoning: "Why it was decided", 
+  importance: "high"
+})
+```
+
+## Requirement Storage
+
+The AI **MUST** document project requirements:
+
+```
+mcp_cursor10x_storeRequirement({
+  title: "Requirement Title", 
+  content: "Description", 
+  importance: "high"
+})
+```
+
+## High Importance Memory Retrieval
+
+The AI **SHOULD** consider high importance memories:
+
+```
+mcp_cursor10x_getComprehensiveContext({})
+```
+
+## Milestone Storage Triggers
+
+The AI **MUST** store milestones when:
+- Major features are completed
+- Project phases are finished
+- Significant bugs are fixed
+- Architecture decisions are implemented
+- User confirms completion of important tasks
+
+## Decision Storage Triggers
+
+The AI **MUST** store decisions when:
+- Technology choices are made
+- Architecture patterns are selected
+- Implementation approaches are chosen
+- Project direction changes
+- Trade-offs are accepted
+
+## Requirement Storage Triggers
+
+The AI **MUST** store requirements when the user:
+- Explicitly states "this is a requirement"
+- Defines must-have functionality
+- Sets constraints on implementation
+- Establishes acceptance criteria
+- Defines specific behavior expectations
+
+## Importance Level Guidelines
+
+When storing items in long-term memory:
+
+- **low**: Nice-to-have features, minor improvements
+- **medium**: Standard features, expected behavior
+- **high**: Core functionality, key requirements
+- **critical**: System architecture, security, compliance

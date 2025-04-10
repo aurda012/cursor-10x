@@ -1,0 +1,162 @@
+---
+description: Comprehensive Memory System architecture for autonomous Cursor operation
+globs: **/*
+alwaysApply: true
+---
+
+# Memory System Architecture
+
+The Cursor10x Memory System provides persistent context awareness across conversations using MCP tools for:
+- Short-term memory (recent messages, context)
+- Long-term memory (milestones, decisions, requirements)
+- Episodic memory (chronological actions and events)
+
+## Response Start Sequence
+
+The AI **MUST** execute this exact tool call at the start of EVERY response, without exception:
+
+```
+mcp_cursor10x_initConversation({
+  content: "[user message]",
+  importance: "[appropriate importance level]"
+})
+```
+
+This single tool call replaces the previous sequence of separate calls and:
+1. Stores the user message
+2. Generates the memory banner
+3. Retrieves comprehensive context
+
+## Conversation End Sequence
+
+The AI **MUST** execute this sequence before ending a conversation without exception:
+
+1. Store important assistant response
+   ```
+   mcp_cursor10x_storeAssistantMessage({
+     content: "Brief summary of information provided",
+     importance: "medium"
+   })
+   ```
+
+2. Track active files that were discussed
+   ```
+   mcp_cursor10x_trackActiveFile({
+     filename: "path/to/file", 
+     action: "view"
+   })
+   ```
+
+3. Store any milestones achieved
+   ```
+   mcp_cursor10x_storeMilestone({
+     title: "Milestone Title", 
+     description: "Description of what was accomplished",
+     importance: "medium"
+   })
+   ```
+
+4. Record the interaction as an episode
+   ```
+   mcp_cursor10x_recordEpisode({
+     actor: "assistant",
+     action: "implementation",
+     content: "Brief summary of completed task",
+     importance: "medium"
+   })
+   ```
+
+## Automatic Memory Tools Usage
+
+The AI **MUST** use the following memory tools automatically throughout every interaction:
+
+- **For Assistant Messages**
+  ```
+  mcp_cursor10x_storeAssistantMessage({
+    content: "Assistant response content", 
+    importance: "medium"
+  })
+  ```
+
+- **For Project Milestones**
+  ```
+  mcp_cursor10x_storeMilestone({
+    title: "Milestone Title", 
+    description: "Description of what was accomplished",
+    importance: "medium"
+  })
+  ```
+
+- **For Project Decisions**
+  ```
+  mcp_cursor10x_storeDecision({
+    title: "Decision Title", 
+    content: "What was decided", 
+    reasoning: "Why it was decided",
+    importance: "medium"
+  })
+  ```
+
+- **For Project Requirements**
+  ```
+  mcp_cursor10x_storeRequirement({
+    title: "Requirement Title", 
+    content: "Description of requirement",
+    importance: "medium"
+  })
+  ```
+
+- **For Active File Tracking**
+  ```
+  mcp_cursor10x_trackActiveFile({
+    filename: "path/to/file", 
+    action: "view"
+  })
+  ```
+
+## Additional Context Retrieval
+
+The AI **MAY** use these context tools when additional context is needed:
+
+```
+mcp_cursor10x_getRecentMessages({limit: 5})
+
+mcp_cursor10x_getActiveFiles({limit: 3})
+```
+
+## Memory System Health
+
+The AI **SHOULD** check memory system health when experiencing context issues:
+
+```
+mcp_cursor10x_checkHealth({})
+
+mcp_cursor10x_getMemoryStats({})
+```
+
+## Importance Levels
+
+When storing memory items, use appropriate importance levels:
+- **low**: General information, routine operations
+- **medium**: Useful context, standard work
+- **high**: Critical decisions, major features
+- **critical**: Core architecture, security, data-integrity
+
+## Automatic Data Storage Triggers
+
+The AI **MUST** automatically store memories based on these triggers without exception:
+
+1. **User Messages**
+   - Automatically handled by initConversation tool
+   
+2. **Assistant Messages**
+   - Store EVERY response providing explanations or solutions
+   - Store EVERY response making recommendations or drawing conclusions
+   
+3. **Milestones**
+   - Store when completing ANY task or feature
+   - Store when resolving ANY issue or implementing a solution
+   
+4. **Active Files**
+   - Track EVERY code file being discussed or modified
+   - Track EVERY configuration or documentation file referenced

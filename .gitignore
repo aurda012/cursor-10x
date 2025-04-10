@@ -1,5 +1,7 @@
 .cursor/node_modules
 .cursor/node_modules/
 
-.cursor/db/memory-system.db
-.cursor/db/scratchpad-system.db
+.cursor/mcp/node_modules
+.cursor/mcp/node_modules/
+
+.env.local

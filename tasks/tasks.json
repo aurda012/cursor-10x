@@ -1,26 +1,18 @@
 {
+  "metadata": {
+    "totalTasks": 0,
+    "pendingCount": 0,
+    "completeCount": 0,
+    "skippedCount": 0,
+    "lastUpdated": "2025-04-09T16:30:00.000Z"
+  },
   "tasks": [
     {
       "id": "001",
-      "filename": "task_001.txt",
-      "title": "Initialize Project Structure",
-      "file": "package.json",
+      "title": "Example Task",
+      "file": "example.md",
       "status": "pending",
-      "prompt": "Based on the architecture.md file, please create the basic folder structure and essential configuration files for the project. This should include all primary directories, package.json with initial dependencies, and configuration files for build tools. Ensure the structure aligns with the architectural requirements. Create the initial project structure with all necessary directories and base configuration files according to the architecture diagram."
-    },
-    {
-      "id": "002",
-      "filename": "task_002.txt",
-      "title": "Setup Core Dependencies",
-      "file": ".env.example",
-      "status": "pending",
-      "prompt": "Please set up the core dependencies for the project by creating an .env.example file with all required environment variables clearly documented. Include comments explaining each variable's purpose and acceptable values."
+      "prompt": "Detailed prompt for the task"
     }
-  ],
-  "metadata": {
-    "last_updated": "2023-07-23T12:00:00Z",
-    "pending_count": 2,
-    "in_progress_count": 0,
-    "done_count": 0
-  }
+  ]
 }

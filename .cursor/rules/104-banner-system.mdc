@@ -1,0 +1,129 @@
+---
+description: Banner System for adding memory context to Claude interactions
+globs: **/*
+alwaysApply: true
+---
+
+# Memory System Banner
+
+The Banner system provides essential context about the memory state at the beginning of every response.
+
+## Banner Generation
+
+The AI **MUST** generate a memory banner at the start of EVERY response without exception through the initConversation tool:
+
+```
+mcp_cursor10x_initConversation({
+  content: "[user message]",
+  importance: "[appropriate importance level]"
+})
+```
+
+This unified tool call handles:
+1. Storing the user message
+2. Generating and displaying the memory banner
+3. Retrieving comprehensive context for the assistant
+
+## Banner Content
+
+The banner **MUST** include:
+
+1. **Active Files**: Most recently viewed or edited files
+2. **Recent Messages**: Summary of recent important conversation points
+3. **Recent Episodes**: Latest significant events with human-readable timestamps
+4. **Memory Stats**: Overall statistics about the memory system
+5. **Project Context**: Key milestones, decisions, and requirements
+
+## Timestamp Formatting
+
+All timestamps in the banner **MUST** be human-readable:
+
+```javascript
+// Convert timestamp to human-readable format
+function formatTimestamp(timestamp) {
+  const date = new Date(timestamp);
+  const now = new Date();
+  
+  // Within the last hour
+  if (now - date < 60 * 60 * 1000) {
+    const minutesAgo = Math.floor((now - date) / (60 * 1000));
+    return `${minutesAgo} minute${minutesAgo !== 1 ? 's' : ''} ago`;
+  }
+  
+  // Within the same day
+  if (date.getDate() === now.getDate() && 
+      date.getMonth() === now.getMonth() && 
+      date.getFullYear() === now.getFullYear()) {
+    return `Today at ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+  }
+  
+  // Yesterday
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (date.getDate() === yesterday.getDate() && 
+      date.getMonth() === yesterday.getMonth() && 
+      date.getFullYear() === yesterday.getFullYear()) {
+    return `Yesterday at ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+  }
+  
+  // Within the last week
+  if (now - date < 7 * 24 * 60 * 60 * 1000) {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return `${days[date.getDay()]} at ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+  }
+  
+  // Default format for older dates
+  return `${date.toLocaleDateString()} at ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+}
+```
+
+## Banner Display
+
+The banner **MUST** be displayed:
+
+1. At the start of EVERY response without exception
+2. Before any other content is provided to the user
+3. Before any other tool calls or operations
+
+## Automatic Banner Retrieval
+
+The AI **MUST** automatically retrieve and display the banner:
+
+1. At the start of EVERY response
+2. By using the initConversation tool as the FIRST operation
+3. Before performing any other operations or tool calls
+
+## Banner Format
+
+The banner format **SHOULD** be concise and informative:
+
+```
+=== MEMORY SYSTEM STATUS ===
+Active Files (3): 
+- memory-system.js (edited 5 minutes ago)
+- episodic-memory.js (viewed yesterday at 15:30)
+- banner-system.js (created Monday at 09:45)
+
+Recent Episodes:
+- User requested implementation of episodic memory (10 minutes ago)
+- Assistant created the episodic memory module (7 minutes ago)
+- User asked for banner enhancement (2 minutes ago)
+
+Memory Stats: 15 messages, 8 files, 12 episodes tracked
+
+Key Project Context:
+- Implementing comprehensive memory system (High importance)
+- Memory data persistence required (Medium importance)
+=== END STATUS ===
+```
+
+## Implementation Details
+
+The banner generation **MUST**:
+
+1. Be the FIRST operation performed in ANY response
+2. Show relevant context information for the current conversation
+3. Format the data in a human-readable way
+4. Prioritize information by recency and importance
+5. Exclude redundant or unnecessary information
+6. Include timestamps for all events and actions

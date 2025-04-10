@@ -1,0 +1,94 @@
+---
+description: Short-Term Memory (STM) implementation for recent conversation context and active file tracking
+globs: **/*
+alwaysApply: true
+---
+
+# Short-Term Memory System
+
+The Cursor10x Short-Term Memory (STM) system maintains recent context through automatic tracking of:
+- Recent user and assistant messages
+- Active files being viewed or edited
+- Immediate conversation context
+
+## Message Storage
+
+The AI **MUST** automatically store important messages with proper importance levels:
+
+```
+mcp_cursor10x_storeUserMessage({
+  content: "User's message content",
+  importance: "medium" // Can be "low", "medium", "high", or "critical"
+})
+
+mcp_cursor10x_storeAssistantMessage({
+  content: "Your response content",
+  importance: "medium" // Can be "low", "medium", "high", or "critical"
+})
+```
+
+## Importance Level Guidelines
+
+Use these criteria to determine message importance:
+
+1. **Low Importance** (routine information)
+   - General questions about the codebase
+   - Casual conversation
+   - Simple status updates
+
+2. **Medium Importance** (standard information)
+   - Specific questions about implementation
+   - Explanations of how code works
+   - Instructions for routine tasks
+
+3. **High Importance** (significant information)
+   - Critical decisions about architecture
+   - Important bug reports/fixes
+   - Key feature implementation details
+   - Major changes to existing code
+
+4. **Critical Importance** (essential information)
+   - Security vulnerabilities
+   - Data integrity issues
+   - Breaking changes
+   - Core architectural decisions
+
+## Active File Tracking
+
+The AI **MUST** track files the user is actively working with:
+
+```
+mcp_cursor10x_trackActiveFile({
+  filename: "path/to/file.js",
+  action: "view"
+})
+
+mcp_cursor10x_trackActiveFile({
+  filename: "path/to/file.js",
+  action: "edit"
+})
+```
+
+## Context Retrieval
+
+The AI **MUST** retrieve recent context at the start of EVERY response:
+
+```
+mcp_cursor10x_getRecentMessages({limit: 5})
+
+mcp_cursor10x_getActiveFiles({limit: 3})
+```
+
+## Automatic Triggering
+
+The AI **MUST** automatically store messages when:
+- The user provides new information
+- The assistant provides significant explanations
+- The conversation shifts to a new topic
+- The user asks a question or gives an instruction
+- The user or assistant refers to a specific file
+
+The AI **MUST** automatically track files when:
+- The user explicitly mentions working with a file
+- The assistant reads from or edits a file
+- The conversation focuses on a specific file

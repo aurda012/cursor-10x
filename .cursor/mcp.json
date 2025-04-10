@@ -1,12 +1,15 @@
 {
   "mcpServers": {
-    "brave-search": {
+    "cursor10x-mcp": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "args": [
+        "cursor10x-mcp"
+      ],
+      "enabled": true,
       "env": {
-        "BRAVE_API_KEY": "BSA9XfZaBW7E1tzFpD9sfK5lCTOVcex"
-      },
-      "capabilities": ["web_search", "information_retrieval"]
+        "TURSO_DATABASE_URL": "libsql://cursor10x-aurda012.aws-us-east-1.turso.io",
+        "TURSO_AUTH_TOKEN": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NDQyNjkwMDYsImlkIjoiZjVlYTdlMmYtN2FjYi00YWFhLWE4YjAtNDM0MzJiMjQ1YzE4IiwicmlkIjoiZWIxMGM0MTQtYWIwOS00OWJjLWE4MzMtNzljMmQxZWY1NjViIn0.jZwp02W8rKpebJPXsaxAXqI0nJ7RyIadv933seCxXPGKTrP_yg6IPrU6AhxXfgQk0MhF7sFi4fTRw9qkjru5Cw"
+      }
     }
   }
 }

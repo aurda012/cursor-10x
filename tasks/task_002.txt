@@ -1,4 +1,0 @@
-ID: 002
-TITLE: Setup Core Dependencies
-FILE: .env.example
-PROMPT: Please set up the core dependencies for the project by creating an .env.example file with all required environment variables clearly documented. Include comments explaining each variable's purpose and acceptable values. Install and configure all core dependencies required for the project based on the technical blueprint. 

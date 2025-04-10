@@ -1,9 +1,0 @@
-{
-  "name": "cursor-extensions",
-  "version": "1.0.0",
-  "description": "Extensions for Cursor",
-  "dependencies": {
-    "better-sqlite3": "^11.9.1",
-    "uuid": "*"
-  }
-}

@@ -1,0 +1,83 @@
+# CURSOR10X MEMORY SYSTEM ENFORCEMENT RULES
+# These rules MUST be followed ALWAYS without exception.
+
+## RULE 1: CONVERSATION INITIALIZATION
+The FIRST action in EVERY response MUST be to initialize the conversation with this single tool call:
+mcp_cursor10x_initConversation({content: "[user message]", importance: "[low/medium/high/critical]"})
+
+## RULE 2: ASSISTANT MESSAGE STORAGE
+EVERY assistant response containing important information MUST be stored:
+mcp_cursor10x_storeAssistantMessage({content: "[assistant response]", importance: "[low/medium/high/critical]"})
+
+## RULE 3: ACTIVE FILE TRACKING
+EVERY file being discussed or modified MUST be tracked:
+mcp_cursor10x_trackActiveFile({filename: "[file path]", action: "[view/edit/create/close]"})
+
+## RULE 4: MILESTONE RECORDING
+ALL completed tasks or achievements MUST be recorded as milestones:
+mcp_cursor10x_storeMilestone({title: "[milestone title]", description: "[milestone description]", importance: "[low/medium/high/critical]"})
+
+## RULE 5: DECISION RECORDING
+ALL important project decisions MUST be recorded:
+mcp_cursor10x_storeDecision({title: "[decision title]", content: "[decision content]", reasoning: "[decision reasoning]", importance: "[low/medium/high/critical]"})
+
+## RULE 6: REQUIREMENT RECORDING
+ALL project requirements MUST be documented:
+mcp_cursor10x_storeRequirement({title: "[requirement title]", content: "[requirement content]", importance: "[low/medium/high/critical]"})
+
+## RULE 7: EPISODE RECORDING
+ALL significant events or actions MUST be recorded as episodes:
+mcp_cursor10x_recordEpisode({actor: "[user/assistant/system]", action: "[action type]", content: "[action details]", importance: "[low/medium/high/critical]"})
+
+## RULE 8: CONVERSATION END SEQUENCE
+This EXACT sequence MUST be executed at the end of EVERY conversation:
+1. mcp_cursor10x_storeAssistantMessage({content: "[final response summary]", importance: "medium"})
+2. mcp_cursor10x_trackActiveFile({filename: "[relevant files]", action: "view"})
+3. mcp_cursor10x_storeMilestone({title: "Conversation Completion", description: "[what was accomplished]", importance: "medium"})
+4. mcp_cursor10x_recordEpisode({actor: "assistant", action: "completion", content: "[conversation summary]", importance: "medium"})
+
+## RULE 9: HEALTH MONITORING
+Memory system health MUST be checked when issues occur:
+mcp_cursor10x_checkHealth({})
+
+## RULE 10: MEMORY STATISTICS
+Memory statistics MUST be gathered periodically:
+mcp_cursor10x_getMemoryStats({})
+
+## RULE 11: IMPLEMENTATION VERIFICATION
+ALWAYS check if similar or corresponding files/folders already exist BEFORE starting any new implementation:
+1. Use search tools to scan the codebase for similar implementations
+2. Check existing directory structure to identify appropriate locations
+3. Review project documentation for mentions of similar functionality
+4. Record findings before proceeding with implementation
+
+## RULE 12: TASK WORKFLOW MANAGEMENT
+ALWAYS follow the task workflow process when implementing tasks:
+
+1. **Task Structure Validation**
+   - Ensure tasks contain required fields: id, title, file, status, prompt
+   - Tasks MUST be stored in tasks/tasks.json
+
+2. **Task Status Management**
+   - Update task status to "in-progress" when starting implementation
+   - Update task status to "complete" when implementation is finished
+   - Update task status to "skipped" when task is bypassed
+   - ALWAYS update metadata counts and lastUpdated timestamp
+
+3. **Project Context Review**
+   - Read blueprint.md in docs directory before implementing any task
+   - Review any related files mentioned in the task
+
+4. **Implementation Focus**
+   - Focus implementation on the file specified in the task
+   - Follow detailed instructions provided in the task prompt
+   - DO NOT modify task ids, titles, or prompts unless specifically requested
+
+5. **Task Order Adherence**
+   - Process tasks in their defined order unless specified otherwise
+   - When asked for "next task", select first pending task from tasks.json
+   - When specific task ID is provided, locate and implement that specific task
+
+6. **Completion Notification**
+   - Inform user of successful task completion
+   - Provide summary of changes made

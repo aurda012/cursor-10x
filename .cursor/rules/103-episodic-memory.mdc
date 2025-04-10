@@ -1,0 +1,130 @@
+---
+description: Episodic Memory implementation for tracking sequences of messages and interactions across time
+globs: **/*
+alwaysApply: true
+---
+
+# Episodic Memory System
+
+The Cursor10x Episodic Memory system tracks chronological sequences of events, conversations, and interactions to maintain a historical record of the project development.
+
+## Episode Recording
+
+The AI **MUST** record significant episodes automatically:
+
+```
+mcp_cursor10x_recordEpisode({
+  actor: "user",
+  action: "requested_feature",
+  content: "User requested implementing a new authentication system",
+  importance: "high"
+})
+
+mcp_cursor10x_recordEpisode({
+  actor: "assistant",
+  action: "implemented_feature",
+  content: "Created authentication system with password hashing",
+  importance: "high"
+})
+
+mcp_cursor10x_recordEpisode({
+  actor: "system",
+  action: "deployment",
+  content: "System automatically deployed code to staging",
+  importance: "medium"
+})
+```
+
+## Episode Types
+
+The AI **MUST** categorize episodes by actor and action type:
+
+### Actors
+- **user**: Actions performed by the user
+- **assistant**: Actions performed by the AI assistant
+- **system**: Actions performed automatically by the system
+
+### Action Types
+- **request**: User requests or questions
+- **implementation**: Code creation or modification
+- **explanation**: Detailed descriptions or clarifications
+- **decision**: Important choices affecting project direction
+- **error**: Problems, bugs, or issues encountered
+- **resolution**: Fixes or solutions to problems
+- **deployment**: System deployment activities
+- **learning**: New information or concepts discovered
+
+## Episode Retrieval
+
+The AI **MUST** retrieve relevant episodes when needed for context:
+
+```
+mcp_cursor10x_getRecentEpisodes({limit: 5})
+```
+
+## Automatic Episode Recording
+
+The AI **MUST** automatically record episodes when:
+
+1. **User Episodes**:
+   - The user requests a new feature
+   - The user reports a bug or issue
+   - The user makes an important decision
+   - The user provides new requirements
+   - The user changes project direction
+
+2. **Assistant Episodes**:
+   - The assistant implements code
+   - The assistant explains complex concepts
+   - The assistant resolves errors
+   - The assistant recommends architectural changes
+   - The assistant completes significant tasks
+
+3. **System Episodes**:
+   - Automatic deployments occur
+   - System tests run
+   - Scheduled maintenance happens
+   - Memory system performs cleanup
+   - Database operations complete
+
+## Episode Importance Guidelines
+
+Use these criteria to determine episode importance:
+
+1. **Low Importance**:
+   - Routine conversations
+   - Minor file edits
+   - Documentation updates
+   - Simple clarifications
+
+2. **Medium Importance**:
+   - Feature implementations
+   - Bug fixes
+   - Code refactoring
+   - Performance improvements
+
+3. **High Importance**:
+   - Major architectural decisions
+   - Critical bug resolutions
+   - Core feature implementations
+   - Security-related changes
+
+4. **Critical Importance**:
+   - Security vulnerabilities
+   - Data loss incidents
+   - System-wide failures
+   - Breaking changes to core functionality
+
+## Episodic Memory vs. Short-Term Memory
+
+- **Episodic Memory**: Chronological sequence of events over time
+- **Short-Term Memory**: Recent messages and active files without sequence
+
+## Importance for Long Projects
+
+The AI **SHOULD** leverage episodic memory for:
+- Projects spanning multiple sessions
+- Complex workflows with many steps
+- Tasks requiring sequential understanding
+- Debugging processes with multiple attempts
+- Long-running operations with checkpoints

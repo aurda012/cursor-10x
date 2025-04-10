@@ -1,0 +1,101 @@
+---
+description: Task Workflow System for project implementation
+globs: tasks/*.json
+alwaysApply: true
+---
+
+# Task Workflow System
+
+- **Purpose:** Standardize task implementation with proper tracking and status updates
+- **Implementation:** Tasks stored in `tasks/tasks.json`
+
+## Task Management Workflow
+
+- **Task Structure**
+  - Tasks are defined in `tasks/tasks.json` with:
+    - `id`: Unique identifier for the task
+    - `title`: Short description of the task
+    - `file`: Main file to be created or modified
+    - `status`: Current status (pending, in-progress, complete, skipped)
+    - `prompt`: Detailed instructions for implementation
+
+- **Task Status Management**
+  ```javascript
+  // ✅ DO: Update task status when starting implementation
+  // Change status from "pending" to "in-progress"
+  // Update the relevant metadata counts and lastUpdated
+
+  // ✅ DO: Update task status when completing implementation
+  // Change status from "in-progress" to "complete"
+  // Update the relevant metadata counts and lastUpdated
+  
+  // ✅ DO: Update task status when skipping a task
+  // Change status from "pending" to "skipped"
+  // Update the relevant metadata counts and lastUpdated
+  ```
+
+## Task Implementation Guidelines
+
+- **Always review the project blueprint before implementing tasks**
+  ```javascript
+  // ✅ DO: Read the blueprint.md file in the docs directory
+  // This provides essential context about the overall project architecture
+  ```
+
+- **Only modify task status and metadata in tasks.json**
+  ```javascript
+  // ✅ DO: Only update the "status" field of tasks
+  // ✅ DO: Update metadata counts (totalTasks, pendingCount, completeCount, skippedCount)
+  // ✅ DO: Update the lastUpdated timestamp
+  
+  // ❌ DON'T: Modify task ids, titles, or prompts unless specifically requested
+  ```
+
+- **Implement each task according to its prompt and specified file**
+  ```javascript
+  // ✅ DO: Focus implementation on the file specified in the task
+  // ✅ DO: Follow the detailed instructions in the prompt
+  ```
+
+- **Always process tasks in their defined order unless specified**
+  ```javascript
+  // ✅ DO: Find the first task with status "pending" when asked for "next task"
+  // ✅ DO: If a specific task ID is provided, implement that task
+  ```
+
+## Task Workflow Process
+
+1. **Find the task to implement**
+   - When user requests "next task", select first pending task from `tasks/tasks.json`
+   - When user specifies task ID, locate that specific task
+   
+2. **Update task status to "in-progress"**
+   - Change status field to "in-progress"
+   - Update metadata (pendingCount, lastUpdated)
+   - Save changes to tasks.json
+   
+3. **Review project context**
+   - Read docs/blueprint.md to understand project architecture
+   - Review any related files mentioned in the task
+   
+4. **Implement the task**
+   - Follow instructions in the task prompt
+   - Focus on the file specified in the task
+   
+5. **Update task status to "complete"**
+   - Change status field to "complete"
+   - Update metadata (pendingCount, completeCount, lastUpdated)
+   - Save changes to tasks.json
+   
+6. **Notify completion**
+   - Inform user of successful task completion
+   - Provide summary of changes made
+
+## Task Skipping Process
+
+1. **Update task status to "skipped"**
+   - Change status field to "skipped"
+   - Update metadata (pendingCount, skippedCount, lastUpdated)
+   - Save changes to tasks.json
+   
+2. **Proceed to next pending task if requested**
