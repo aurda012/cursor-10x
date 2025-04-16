@@ -11,45 +11,126 @@ The Cursor10x Memory System provides persistent context awareness across convers
 - Long-term memory (milestones, decisions, requirements)
 - Episodic memory (chronological actions and events)
 
+## TOOL EXECUTION PATTERN
+
+The memory system follows a strict tool execution pattern:
+
+```javascript
+// ✅ DO: Follow this execution pattern for ALL conversations
+// 1. BEGIN with initConversation - EXACTLY ONCE at the start
+// 2. USE appropriate tools throughout the conversation as needed
+// 3. END with endConversation - EXACTLY ONCE at the very end
+
+// ❌ DON'T: Call initConversation multiple times in one response
+// ❌ DON'T: Call endConversation in the middle of a conversation
+// ❌ DON'T: Skip storing important context or decisions
+```
+
 ## RULE 1: CONVERSATION INITIALIZATION
-The FIRST action in the BEGINNING of EVERY response MUST be to initialize the conversation with this single tool call and display the banner from the response immediately after. It should not be called throughout the conversation response, ONLY right after the user's input:
+The FIRST action in the BEGINNING of EVERY response MUST be to initialize the conversation with this single tool call and display the banner from the response immediately after. It MUST be called EXACTLY ONCE per conversation and ONLY at the very beginning after receiving user input:
+
+```javascript
+// ✅ DO: Call EXACTLY ONCE at the beginning of EVERY conversation
 mcp_cursor10x_initConversation({content: "[user message]", importance: "[low/medium/high/critical]"})
 
+// ❌ DON'T: Call multiple times within the same conversation
+// ❌ DON'T: Call in the middle or end of a conversation
+// ❌ DON'T: Skip calling this at the start
+```
+
 ## RULE 2: ASSISTANT MESSAGE STORAGE
-EVERY assistant response containing important information MUST be stored:
+EVERY assistant response containing important information MUST be stored. This can be called MULTIPLE times as needed during a conversation to store significant assistant responses:
+
+```javascript
+// ✅ DO: Call when storing important information
 mcp_cursor10x_storeAssistantMessage({content: "[assistant response]", importance: "[low/medium/high/critical]"})
 
+// ✅ DO: Store multiple distinct responses when appropriate
+```
+
 ## RULE 3: ACTIVE FILE TRACKING
-EVERY file being worked on or modified MUST be tracked - not files being read:
+EVERY file being worked on or modified MUST be tracked - not files being read. This should be called whenever starting work on a file:
+
+```javascript
+// ✅ DO: Track when editing or creating files
 mcp_cursor10x_trackActiveFile({filename: "[file path]", action: "[edit/create]"})
 
+// ❌ DON'T: Track files that are only being read
+```
+
 ## RULE 4: MILESTONE RECORDING
-ALL completed tasks or achievements MUST be recorded as milestones:
+ALL completed tasks or achievements MUST be recorded as milestones. Use this to mark significant accomplishments:
+
+```javascript
+// ✅ DO: Record milestones when completing important tasks
 mcp_cursor10x_storeMilestone({title: "[milestone title]", description: "[milestone description]", importance: "[low/medium/high/critical]"})
+```
 
 ## RULE 5: DECISION RECORDING
-ALL important project decisions MUST be recorded:
+ALL important project decisions MUST be recorded. Use this when making significant decisions:
+
+```javascript
+// ✅ DO: Record important decisions with reasoning
 mcp_cursor10x_storeDecision({title: "[decision title]", content: "[decision content]", reasoning: "[decision reasoning]", importance: "[low/medium/high/critical]"})
+```
 
 ## RULE 6: REQUIREMENT RECORDING
-ALL project requirements MUST be documented:
+ALL project requirements MUST be documented. Use this when identifying or defining requirements:
+
+```javascript
+// ✅ DO: Document project requirements
 mcp_cursor10x_storeRequirement({title: "[requirement title]", content: "[requirement content]", importance: "[low/medium/high/critical]"})
+```
 
 ## RULE 7: EPISODE RECORDING
-ALL significant events or actions MUST be recorded as episodes:
+ALL significant events or actions MUST be recorded as episodes. Use this to track important interactions:
+
+```javascript
+// ✅ DO: Record significant events
 mcp_cursor10x_recordEpisode({actor: "[user/assistant/system]", action: "[action type]", content: "[action details]", importance: "[low/medium/high/critical]"})
+```
 
 ## RULE 8: CONVERSATION END SEQUENCE
-This EXACT sequence MUST be executed at the VERY END of EVERY conversation:
-mcp_cursor10x_endConversation({content: "[Content of the assistant's final message]", milestone_title: "[Title for the completion milestone]", milestone_description: "[Description of what was accomplished]", important: "[optional |  Importance level (low, medium, high, critical)]", metadata: "[Additional metadata for the operations]" })
+This EXACT sequence MUST be executed at the VERY END of EVERY conversation and EXACTLY ONCE per conversation:
+
+```javascript
+// ✅ DO: Call EXACTLY ONCE at the very end of the conversation
+mcp_cursor10x_endConversation({content: "[Content of the assistant's final message]", milestone_title: "[Title for the completion milestone]", milestone_description: "[Description of what was accomplished]", importance: "[low/medium/high/critical]", metadata: "[Additional metadata for the operations]" })
+
+// ❌ DON'T: Call in the middle of a conversation
+// ❌ DON'T: Call multiple times
+// ❌ DON'T: Skip calling this at the end
+```
 
 ## RULE 9: HEALTH MONITORING
 Memory system health MUST be checked when issues occur:
+
+```javascript
+// ✅ DO: Check health when troubleshooting problems
 mcp_cursor10x_checkHealth({})
+```
 
 ## RULE 10: MEMORY STATISTICS
 Memory statistics MUST be gathered periodically:
+
+```javascript
+// ✅ DO: Get memory stats when useful for context
 mcp_cursor10x_getMemoryStats({})
+```
+
+## RULE 11: CONTEXT RETRIEVAL
+Use context retrieval tools as needed throughout the conversation:
+
+```javascript
+// ✅ DO: Get comprehensive context when needed
+mcp_cursor10x_getComprehensiveContext({})
+
+// ✅ DO: Get recent messages when relevant
+mcp_cursor10x_getRecentMessages({limit: 5, importance: "high"})
+
+// ✅ DO: Get active files when working on code
+mcp_cursor10x_getActiveFiles({limit: 5})
+```
 
 ## Importance Levels
 
