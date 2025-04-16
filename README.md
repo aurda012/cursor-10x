@@ -10,7 +10,7 @@ Cursor10x is a comprehensive suite of tools that enhances Claude's capabilities 
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Active-brightgreen" alt="Active">
-  <img src="https://img.shields.io/badge/Version-1.0.1-blue" alt="Version 1.0.1">
+  <img src="https://img.shields.io/badge/Version-1.3.0-blue" alt="Version 1.3.0">
   <img src="https://img.shields.io/badge/License-MIT-yellow" alt="MIT License">
 </p>
 
@@ -29,12 +29,18 @@ Cursor10x is a comprehensive suite of tools that enhances Claude's capabilities 
 
 ### 🔥 **The Cursor10x Memory System is now part of the complete Cursor10x Platform!** 🔥
 
-- **📋 Task Management System** - Guided implementation with step-by-step tasks
-- **🔄 Autonomous Memory** - Context-aware AI that remembers your entire project
-- **📊 Project Blueprints** - Complete technical architectures created for your specifications
-- **📁 File/Folder Architecture** - Optimized project structure with best practices
-- **📘 Implementation Guide** - Comprehensive documentation for all files and components
-- **📝 Detailed Tasks** - Complete workflow from project initiation to completion
+Discover the full autonomous development ecosystem at [GitHub](https://github.com/aurda012/cursor10x) featuring:
+
+**📋 Task Management System** - Guided implementation with step-by-step tasks
+**🔄 Autonomous Memory** - Context-aware AI that remembers your entire project
+**📊 Project Blueprints** - Complete technical architectures created for your specifications
+**📁 File/Folder Architecture** - Optimized project structure with best practices
+**📘 Implementation Guide** - Comprehensive documentation for all files and components
+**📝 Detailed Tasks** - Complete workflow from project initiation to completion
+**🔍 Vector-Based Search** - Semantic search across your codebase and conversations
+**🧩 Code Indexing** - Automatic detection and indexing of code structures
+**🔎 Semantic Code Retrieval** - Find related code by meaning rather than exact matches
+**🤖 Automatic Code Analysis** - Extract functions, classes, and variables with context
 
 <p align="center">
   <a href="https://cursor10x.com" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Visit cursor10x.com</a>
@@ -43,6 +49,8 @@ Cursor10x is a comprehensive suite of tools that enhances Claude's capabilities 
 <i>Generate complete project blueprints with file architecture, implementation guides, and full task sequences along with the entire Cursor10x system already implemented!</i>
 
 </div>
+
+---
 
 ## 📋 Table of Contents
 
@@ -65,134 +73,73 @@ Cursor10x bridges the gap between stateless AI interactions and continuous devel
 
 The system uses the Model Context Protocol (MCP) to register tools that Claude can execute directly, creating a fully autonomous development assistant with memory and structured workflows.
 
-## Memory System
+## Overview
 
-### Architecture
+The Cursor10x Memory System creates a persistent memory layer for AI assistants (specifically Claude), enabling them to retain and recall:
 
-The Cursor10x Memory System uses Turso Database for persistent storage of all memory data across sessions, organized into three main components:
+- Recent messages and conversation history
+- Active files currently being worked on
+- Important project milestones and decisions
+- Technical requirements and specifications
+- Chronological sequences of actions and events (episodes)
+- Code snippets and structures from your codebase
+- Semantically similar content based on vector embeddings
+- Related code fragments through semantic similarity
+- File structures with function and variable relationships
+
+This memory system bridges the gap between stateless AI interactions and continuous development workflows, allowing for more productive and contextually aware assistance.
+
+## System Architecture
+
+The memory system is built on four core components:
+
+1. **MCP Server**: Implements the Model Context Protocol to register tools and process requests
+2. **Memory Database**: Uses Turso database for persistent storage across sessions
+3. **Memory Subsystems**: Organizes memory into specialized systems with distinct purposes
+4. **Vector Embeddings**: Transforms text and code into numerical representations for semantic search
+
+### Memory Types
+
+The system implements four complementary memory types:
 
 1. **Short-Term Memory (STM)**
-   - Recent messages and conversation history
-   - Active files currently being worked on
-   - Immediate conversation context
+   - Stores recent messages and active files
+   - Provides immediate context for current interactions
+   - Automatically prioritizes by recency and importance
 
-2. **Long-Term Memory (LTM)** 
-   - Project milestones and achievements
-   - Important decisions with reasoning
-   - Technical requirements and specifications
+2. **Long-Term Memory (LTM)**
+   - Stores permanent project information like milestones and decisions
+   - Maintains architectural and design context
+   - Preserves high-importance information indefinitely
 
 3. **Episodic Memory**
-   - Chronological sequences of events
-   - Actions performed by users and the assistant
-   - Temporal context for the project history
+   - Records chronological sequences of events
+   - Maintains causal relationships between actions
+   - Provides temporal context for project history
 
-### Key Memory Tools
+4. **Semantic Memory**
+   - Stores vector embeddings of messages, files, and code snippets
+   - Enables retrieval of content based on semantic similarity
+   - Automatically indexes code structures for contextual retrieval
+   - Tracks relationships between code components
+   - Provides similarity-based search across the codebase
 
-| Tool | Description |
-|------|-------------|
-| `mcp_cursor10x_initConversation` | Initializes a conversation, generating banner and context |
-| `mcp_cursor10x_storeAssistantMessage` | Stores an assistant message in memory |
-| `mcp_cursor10x_trackActiveFile` | Tracks file activity (viewing, editing) |
-| `mcp_cursor10x_storeMilestone` | Records project achievements |
-| `mcp_cursor10x_storeDecision` | Records important decisions with reasoning |
-| `mcp_cursor10x_storeRequirement` | Documents project requirements |
-| `mcp_cursor10x_recordEpisode` | Tracks chronological events |
-| `mcp_cursor10x_checkHealth` | Verifies memory system functionality |
-| `mcp_cursor10x_getMemoryStats` | Retrieves memory statistics |
+## Features
 
-### Memory Banner
-
-Every conversation begins with a memory banner that provides context:
-
-```
-=== MEMORY SYSTEM STATUS ===
-Active Files (3): 
-- memory-system.js (edited 5 minutes ago)
-- episodic-memory.js (viewed yesterday at 15:30)
-- banner-system.js (created Monday at 09:45)
-
-Recent Episodes:
-- User requested implementation of episodic memory (10 minutes ago)
-- Assistant created the episodic memory module (7 minutes ago)
-- User asked for banner enhancement (2 minutes ago)
-
-Memory Stats: 15 messages, 8 files, 12 episodes tracked
-
-Key Project Context:
-- Implementing comprehensive memory system (High importance)
-- Memory data persistence required (Medium importance)
-=== END STATUS ===
-```
-
-### Memory Rules Enforcement
-
-The `.cursorrules` file enforces memory tools usage in every interaction:
-
-```
-## RULE 1: CONVERSATION INITIALIZATION
-The FIRST action in EVERY response MUST be to initialize the conversation:
-mcp_cursor10x_initConversation({content: "[user message]", importance: "[level]"})
-
-## RULE 2: ASSISTANT MESSAGE STORAGE
-EVERY assistant response containing important information MUST be stored:
-mcp_cursor10x_storeAssistantMessage({content: "[response]", importance: "[level]"})
-```
-
-## Task Management
-
-Cursor10x implements a structured task management system that standardizes how tasks are created, tracked, and completed.
-
-### Task Structure
-
-Tasks are stored in `tasks/tasks.json` and contain:
-
-```json
-{
-  "tasks": [
-    {
-      "id": "task-001",
-      "title": "Implement User Authentication",
-      "file": "src/auth/AuthService.js",
-      "status": "pending",
-      "prompt": "Create a service for handling user authentication using JWT..."
-    }
-  ],
-  "metadata": {
-    "totalTasks": 12,
-    "pendingCount": 7,
-    "completeCount": 4,
-    "skippedCount": 1,
-    "lastUpdated": "2025-04-10T08:11:33.803Z"
-  }
-}
-```
-
-### Task Workflow Process
-
-The task workflow, enforced by cursor rules, follows these steps:
-
-1. **Find Next Task**: Identify the next pending task or specific task by ID
-2. **Mark as In-Progress**: Update status and metadata
-3. **Review Project Context**: Read blueprint.md and related files
-4. **Implement Task**: Follow instructions in the task prompt
-5. **Mark as Complete**: Update status and metadata
-6. **Notify Completion**: Provide summary of changes
-
-### Task Rules Enforcement
-
-```
-## RULE 12: TASK WORKFLOW MANAGEMENT
-ALWAYS follow the task workflow process when implementing tasks:
-
-1. **Task Structure Validation**
-   - Ensure tasks contain required fields: id, title, file, status, prompt
-   - Tasks MUST be stored in tasks/tasks.json
-
-2. **Task Status Management**
-   - Update task status to "in-progress" when starting implementation
-   - Update task status to "complete" when implementation is finished
-   ...
-```
+- **Persistent Context**: Maintains conversation and project context across multiple sessions
+- **Importance-Based Storage**: Prioritizes information based on configurable importance levels
+- **Multi-Dimensional Memory**: Combines short-term, long-term, episodic, and semantic memory systems
+- **Comprehensive Retrieval**: Provides unified context from all memory subsystems
+- **Health Monitoring**: Includes built-in diagnostics and status reporting
+- **Banner Generation**: Creates informative context banners for conversation starts
+- **Database Persistence**: Stores all memory data in Turso database with automatic schema creation
+- **Vector Embeddings**: Creates numerical representations of text and code for similarity search
+- **Code Indexing**: Automatically detects and indexes code structures (functions, classes, variables)
+- **Semantic Search**: Finds related content based on meaning rather than exact text matches
+- **Relevance Scoring**: Ranks context items by relevance to the current query
+- **Code Structure Detection**: Identifies and extracts code components across multiple languages
+- **Auto-Embedding Generation**: Automatically creates vector embeddings for indexed content
+- **Cross-Reference Retrieval**: Finds related code across different files and components
 
 ## Cursor Rules
 
@@ -291,7 +238,7 @@ Update `.cursor/mcp.json` in your project directory with the database url and tu
 
 4. **Copy and Paste Cursor Rules:**
 
-Copy and paste the contents of the `.cursorrules` file in your project root and paste it into your cursor settings rules Cursor Settings -> Rules -> User Rules
+Download or copy and paste the .cursor/rules directory into your project. Next, copy and paste the contents of the `.cursorrules` file in your project root and paste it into your cursor settings rules Cursor Settings -> Rules -> User Rules. You can also copy and paste the `.cursorrules` file into your main directory as well.
 
 ## Examples
 
