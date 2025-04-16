@@ -11,7 +11,7 @@ mcp_cursor10x_storeAssistantMessage({content: "[assistant response]", importance
 
 ## RULE 3: ACTIVE FILE TRACKING
 EVERY file being worked on or modified MUST be tracked - not files being read:
-mcp_cursor10x_trackActiveFile({filename: "[file path]", action: "[view/edit/create/close]"})
+mcp_cursor10x_trackActiveFile({filename: "[file path]", action: "[edit/create]"})
 
 ## RULE 4: MILESTONE RECORDING
 ALL completed tasks or achievements MUST be recorded as milestones:
