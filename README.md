@@ -28,6 +28,10 @@
 **📚 External Documentation** - Automatically retrieves and integrates relevant documentation
 **📋 Workflow Integration** - Seamless task management workflow built-in
 
+#### 👀 **Be on the lookout** 👀
+
+The DevContext Project Generator is launching in the next couple days and will create a COMPLETE set up for your project to literally 10x your development workflow.
+
 <p align="center">
   <a href="https://github.com/aurda012/devcontext" style="display: inline-block; background-color: rgba(40, 230, 210); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s ease;">Visit DevContext Repository</a>
 </p>
