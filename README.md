@@ -6,12 +6,6 @@
 
 ### Cursor10x has evolved into DevContext - A more powerful, dedicated context system for developers
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Status-Migrated-orange" alt="Migrated">
-  <img src="https://img.shields.io/badge/Version-2.0.0-blue" alt="Version 2.0.0">
-  <img src="https://img.shields.io/badge/License-MIT-yellow" alt="MIT License">
-</p>
-
 <table align="center">
   <tr>
     <td align="center"><b>🧠 Project-Centric</b></td>
