@@ -1,52 +1,44 @@
-# 10x Cursor with Cursor10x - Advanced AI Agent Memory & Task Management System
-
-Cursor10x is a comprehensive suite of tools that enhances Claude's capabilities within the Cursor IDE, providing persistent memory across sessions, standardized task management, and enforced best practices through cursor rules.
+![DevContext - The Next Evolution in AI Development Context](https://i.postimg.cc/sghKLKf6/Dev-Context-banner.png)
 
 <div align="center">
   
-# 🚀 **ANNOUNCING CURSOR10X SYSTEM** 🚀
+# 🚀 **Cursor10x is now DevContext** 🚀
 
-### Transform Your Development Process with AI-Powered Autonomous Systems
+### Cursor10x has evolved into DevContext - A more powerful, dedicated context system for developers
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Status-Active-brightgreen" alt="Active">
-  <img src="https://img.shields.io/badge/Version-1.3.0-blue" alt="Version 1.3.0">
+  <img src="https://img.shields.io/badge/Status-Migrated-orange" alt="Migrated">
+  <img src="https://img.shields.io/badge/Version-2.0.0-blue" alt="Version 2.0.0">
   <img src="https://img.shields.io/badge/License-MIT-yellow" alt="MIT License">
 </p>
 
 <table align="center">
   <tr>
-    <td align="center"><b>🧠 Memory System</b></td>
-    <td align="center"><b>📋 Task Management</b></td>
-    <td align="center"><b>🕛 Cursor Rules</b></td>
+    <td align="center"><b>🧠 Project-Centric</b></td>
+    <td align="center"><b>📊 Relationship Graphs</b></td>
+    <td align="center"><b>⚡ High Performance</b></td>
   </tr>
   <tr>
-    <td align="center">Persistent context awareness</td>
-    <td align="center">Guided implementation</td>
-    <td align="center">For top efficiency</td>
+    <td align="center">One database per project</td>
+    <td align="center">Intelligent code connections</td>
+    <td align="center">Minimal resource needs</td>
   </tr>
 </table>
 
-### 🔥 **The Cursor10x Memory System is now part of the complete Cursor10x Platform!** 🔥
+### 🔥 **DevContext takes AI development to the next level** 🔥
 
-Discover the full autonomous development ecosystem at [GitHub](https://github.com/aurda012/cursor10x) featuring:
-
-**📋 Task Management System** - Guided implementation with step-by-step tasks
-**🔄 Autonomous Memory** - Context-aware AI that remembers your entire project
-**📊 Project Blueprints** - Complete technical architectures created for your specifications
-**📁 File/Folder Architecture** - Optimized project structure with best practices
-**📘 Implementation Guide** - Comprehensive documentation for all files and components
-**📝 Detailed Tasks** - Complete workflow from project initiation to completion
-**🔍 Vector-Based Search** - Semantic search across your codebase and conversations
-**🧩 Code Indexing** - Automatic detection and indexing of code structures
-**🔎 Semantic Code Retrieval** - Find related code by meaning rather than exact matches
-**🤖 Automatic Code Analysis** - Extract functions, classes, and variables with context
+**🔄 Continuous Context Awareness** - Sophisticated retrieval methods focusing on what matters
+**📊 Structured Metadata** - From repository structure down to individual functions
+**🧠 Adaptive Learning** - Continuously learns from and adapts to your development patterns
+**🤖 Completely Autonomous** - Self-managing context system that works in the background
+**📚 External Documentation** - Automatically retrieves and integrates relevant documentation
+**📋 Workflow Integration** - Seamless task management workflow built-in
 
 <p align="center">
-  <a href="https://cursor10x.com" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Visit cursor10x.com</a>
+  <a href="https://github.com/aurda012/devcontext" style="display: inline-block; background-color: rgba(40, 230, 210); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s ease;">Visit DevContext Repository</a>
 </p>
 
-<i>Generate complete project blueprints with file architecture, implementation guides, and full task sequences along with the entire Cursor10x system already implemented!</i>
+<i>DevContext is a cutting-edge Model Context Protocol (MCP) server providing developers with continuous, project-centric context awareness that understands your codebase at a deeper level.</i>
 
 </div>
 
@@ -73,7 +65,9 @@ Cursor10x bridges the gap between stateless AI interactions and continuous devel
 
 The system uses the Model Context Protocol (MCP) to register tools that Claude can execute directly, creating a fully autonomous development assistant with memory and structured workflows.
 
-## Overview
+> **Note:** This project is now deprecated in favor of [DevContext](https://github.com/aurda012/devcontext), which provides enhanced capabilities with more advanced context management.
+
+## Memory System
 
 The Cursor10x Memory System creates a persistent memory layer for AI assistants (specifically Claude), enabling them to retain and recall:
 
@@ -103,16 +97,19 @@ The memory system is built on four core components:
 The system implements four complementary memory types:
 
 1. **Short-Term Memory (STM)**
+
    - Stores recent messages and active files
    - Provides immediate context for current interactions
    - Automatically prioritizes by recency and importance
 
 2. **Long-Term Memory (LTM)**
+
    - Stores permanent project information like milestones and decisions
    - Maintains architectural and design context
    - Preserves high-importance information indefinitely
 
 3. **Episodic Memory**
+
    - Records chronological sequences of events
    - Maintains causal relationships between actions
    - Provides temporal context for project history
@@ -267,11 +264,13 @@ User: "What is the next task in our project?"
 ### Common Issues
 
 1. **Memory System Not Responding**:
+
    - Ensure Turso database is running and accessible.
    - Check network connectivity to Turso.
    - Verify that the cursor rules are correctly configured.
 
 2. **Task Management Errors**:
+
    - Ensure that the task structure is valid and follows the specified format.
    - Verify that the task workflow process is being followed correctly.
 
@@ -282,10 +281,12 @@ User: "What is the next task in our project?"
 ### Debugging Steps
 
 1. **Check Memory System Health**:
+
    - Use the `mcp_cursor10x_checkHealth` tool to verify memory system functionality.
    - If the system is not responding, check the logs for any errors or warnings.
 
 2. **Review Task Workflow**:
+
    - Use the `mcp_cursor10x_getMemoryStats` tool to retrieve memory statistics.
    - If the task workflow is not working as expected, review the task structure and task rules.
 
